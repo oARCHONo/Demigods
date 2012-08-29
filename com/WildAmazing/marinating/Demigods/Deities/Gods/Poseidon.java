@@ -70,7 +70,7 @@ public class Poseidon implements Deity {
 			int healinterval = 10-(int)(Math.round(Math.pow(devotion, 0.125))); //seconds
 			if (healinterval < 1) healinterval = 1;
 			//drown
-			int radius = (int)(Math.ceil(1.6955424*Math.pow(devotion, 0.189349)));
+			int radius = (int)(Math.ceil(1.6955424*Math.pow(devotion, 0.129349)));
 			int duration = (int)Math.ceil(2.80488*Math.pow(devotion, 0.2689)); //seconds
 			//reel
 			int damage = (int)Math.ceil(0.37286*Math.pow(devotion, 0.371238));
@@ -274,7 +274,7 @@ public class Poseidon implements Deity {
 	private void drown(Player p) {
 		//special values
 		int devotion = DUtil.getDevotion(p, getName());
-		int radius = (int)(Math.ceil(1.6955424*Math.pow(devotion, 0.189349)));
+		int radius = (int)(Math.ceil(1.6955424*Math.pow(devotion, 0.129349)));
 		int duration = (int)Math.ceil(2.80488*Math.pow(devotion, 0.2689)); //seconds
 		//
 		Location target = DUtil.getTargetLocation(p);
@@ -289,11 +289,12 @@ public class Poseidon implements Deity {
 				for (int z=-radius; z<=radius;z++) {
 					Block block = target.getWorld().getBlockAt(target.getBlockX()+x, target.getBlockY()+y, target.getBlockZ()+z);
 					if (block.getLocation().distance(target) <= radius) {
-						if ((block.getType() == Material.AIR) || (block.getType() == Material.WATER) || (block.getType() == Material.LAVA)) {
-							block.setType(Material.WATER);
-							block.setData((byte)(0x8));
-							toreset.add(block);
-						}
+						if (DUtil.isPVP(block.getLocation()))
+							if (block.getType() == Material.AIR) {
+								block.setType(Material.WATER);
+								block.setData((byte)(0x8));
+								toreset.add(block);
+							}
 					}
 				}
 			}

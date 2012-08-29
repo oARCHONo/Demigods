@@ -182,28 +182,29 @@ public class ShrineManager implements Listener {
 		if (e.getFrom().distance(e.getTo()) < 0.1)
 			return;
 		for (String player : DUtil.getFullParticipants()) {
-			for (WriteLocation center : DUtil.getShrines(player).values()) {
-				if (!DUtil.toLocation(center).getWorld().equals(e.getPlayer().getWorld()))
-					return;
-				/*
-				 * Outside coming in
-				 */
-				if (e.getFrom().distance(DUtil.toLocation(center)) > RADIUS) {
-					if (DUtil.toLocation(center).distance(e.getTo()) <= RADIUS) {
-						e.getPlayer().sendMessage(ChatColor.GRAY+"You have entered "+player+"'s shrine to "+ChatColor.YELLOW+DUtil.getDeityAtShrine(center)+ChatColor.GRAY+".");
+			if (DUtil.getShrines(player) != null)
+				for (WriteLocation center : DUtil.getShrines(player).values()) {
+					if (!DUtil.toLocation(center).getWorld().equals(e.getPlayer().getWorld()))
 						return;
+					/*
+					 * Outside coming in
+					 */
+					if (e.getFrom().distance(DUtil.toLocation(center)) > RADIUS) {
+						if (DUtil.toLocation(center).distance(e.getTo()) <= RADIUS) {
+							e.getPlayer().sendMessage(ChatColor.GRAY+"You have entered "+player+"'s shrine to "+ChatColor.YELLOW+DUtil.getDeityAtShrine(center)+ChatColor.GRAY+".");
+							return;
+						}
+					}
+					/*
+					 * Leaving
+					 */
+					else if (e.getFrom().distance(DUtil.toLocation(center)) <= RADIUS) {
+						if (DUtil.toLocation(center).distance(e.getTo()) > RADIUS) {
+							e.getPlayer().sendMessage(ChatColor.GRAY+"You have left a shrine.");
+							return;
+						}
 					}
 				}
-				/*
-				 * Leaving
-				 */
-				else if (e.getFrom().distance(DUtil.toLocation(center)) <= RADIUS) {
-					if (DUtil.toLocation(center).distance(e.getTo()) > RADIUS) {
-						e.getPlayer().sendMessage(ChatColor.GRAY+"You have left a shrine.");
-						return;
-					}
-				}
-			}
 		}
 	}
 	@EventHandler (priority = EventPriority.MONITOR)

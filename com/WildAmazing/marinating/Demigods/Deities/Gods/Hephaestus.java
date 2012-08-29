@@ -2,6 +2,7 @@ package com.WildAmazing.marinating.Demigods.Deities.Gods;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -88,13 +89,21 @@ public class Hephaestus implements Deity, Listener {
 				if (!DUtil.hasDeity(p, getName()) || !DUtil.isFullParticipant(p))
 					return;
 				if ((e.getCause()==DamageCause.LAVA) || (e.getCause() == DamageCause.FIRE) || (e.getCause() == DamageCause.FIRE_TICK)) {
-					if ((p.getLocation().getBlock().getType() == Material.LAVA) ||
-							(p.getEyeLocation().getBlock().getType() == Material.LAVA) ||
-							(p.getLocation().getBlock().getType() == Material.STATIONARY_LAVA) ||
-							(p.getEyeLocation().getBlock().getType() == Material.STATIONARY_LAVA)){
-						p.setFireTicks(0);
-						e.setDamage(0);
-						e.setCancelled(true);
+					for (int i=-1;i<=1;i++) {
+						for (int j=-1;j<=1;j++) {
+							Block b = p.getWorld().getBlockAt(p.getLocation().getBlockX()+i, p.getLocation().getBlockY(), p.getLocation().getBlockZ()+j);
+							if ((b.getType() == Material.LAVA) || (b.getType() == Material.STATIONARY_LAVA)) {
+								p.setFireTicks(0);
+								e.setDamage(0);
+								e.setCancelled(true);
+							}
+							b = p.getWorld().getBlockAt(p.getEyeLocation().getBlockX()+i, p.getEyeLocation().getBlockY(), p.getEyeLocation().getBlockZ()+j);
+							if ((b.getType() == Material.LAVA) || (b.getType() == Material.STATIONARY_LAVA)) {
+								p.setFireTicks(0);
+								e.setDamage(0);
+								e.setCancelled(true);
+							}
+						}
 					}
 				}
 			}

@@ -1,6 +1,6 @@
 name: Demigods
 main: com.WildAmazing.marinating.Demigods.Demigods
-version: 2.0d
+version: 2.0f
 description: Ally yourself with mythical deities and battle in the name of the Gods or Titans.
 author: marinating
 softdepend: [WorldGuard, WorldEdit, Factions]
@@ -39,6 +39,9 @@ commands:
     addfavor:
         description: Console command to add to a player's Favor.
         usage: addfavor <player> <amount>
+    addunclaimeddevotion:
+        description: Console command to give a player unclaimed Devotion.
+        usage: addunclaimeddevotion <player> <amount>
     adddevotion:
         description: Console command to add to a player's level.
         usage: adddevotion <player> <deity> <amount>

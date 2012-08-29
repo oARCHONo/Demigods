@@ -190,12 +190,6 @@ public class CommandManager implements CommandExecutor, Listener {
 					String target = DUtil.getDemigodsPlayer(args[0]);
 					int amt = Integer.parseInt(args[1]);
 					DUtil.setAscensions(target, DUtil.getAscensions(target)+amt);
-					long oldtotal = DUtil.getDevotion(target);
-					int newtotal = DUtil.costForNextAscension(amt-1);
-					for (Deity d : DUtil.getDeities(target)) {
-						int devotion = DUtil.getDevotion(target, d);
-						DUtil.setDevotion(target, d, (int)Math.ceil((newtotal*1.0*devotion)/oldtotal));
-					}
 					Logger.getLogger("Minecraft").info("[Demigods] Increased "+target+"'s ascensions by "+amt+" to "+DUtil.getAscensions(target)+".");
 				} catch (Exception error) {
 					Logger.getLogger("Minecraft").severe(error.getMessage());
@@ -253,6 +247,18 @@ public class CommandManager implements CommandExecutor, Listener {
 					int before = DUtil.getDevotion(pl, deity);
 					DUtil.setDevotion(pl, deity, before+amt);
 					Logger.getLogger("Minecraft").info("[Demigods] Increased "+pl+"'s devotion for "+deity.getName()+" by "+amt+" to "+DUtil.getDevotion(pl, deity)+".");
+				} catch (Exception error) {
+					Logger.getLogger("Minecraft").warning("[Demigods] Unable to parse command.");
+					return false;
+				}
+			} else if (c.getName().equalsIgnoreCase("addunclaimeddevotion")) {
+				if (args.length != 2) return false;
+				try {
+					String pl = DUtil.getDemigodsPlayer(args[0]);
+					int amt = Integer.parseInt(args[1]);
+					int before = DUtil.getUnclaimedDevotion(pl);
+					DUtil.setUnclaimedDevotion(pl, before+amt);
+					Logger.getLogger("Minecraft").info("[Demigods] Increased "+pl+"'s unclaimed devotion by "+amt+" to "+DUtil.getUnclaimedDevotion(pl)+".");
 				} catch (Exception error) {
 					Logger.getLogger("Minecraft").warning("[Demigods] Unable to parse command.");
 					return false;
@@ -376,6 +382,8 @@ public class CommandManager implements CommandExecutor, Listener {
 					p.sendMessage(ChatColor.GRAY+"/dg stats");
 					p.sendMessage(ChatColor.GRAY+"/dg rankings");
 					p.sendMessage("To see your own information, use "+ChatColor.YELLOW+"/check");
+					p.sendMessage(ChatColor.DARK_AQUA+"Source: https://github.com/marinating/Demigods in compliance");
+					p.sendMessage(ChatColor.DARK_AQUA+"with GNU Affero General Public License.");
 					p.sendMessage(ChatColor.DARK_AQUA+"Support this plugin with a donation at http://bit.ly/helpdemigods");
 				}
 				if (args.length == 1) {
@@ -774,6 +782,10 @@ public class CommandManager implements CommandExecutor, Listener {
 					return true;
 				}
 				if (DUtil.isGod(p) || DUtil.isTitan(p)) {
+					if (DUtil.getUnclaimedDevotion(p) > 0) {
+						p.sendMessage(ChatColor.AQUA+"You have "+DUtil.getUnclaimedDevotion(p)+" unclaimed Devotion.");
+						p.sendMessage(ChatColor.AQUA+"Allocate it with /adddevotion <deity> <amount>.");
+					}
 					p.sendMessage(ChatColor.YELLOW+"--"+p.getName()+"--"+DUtil.getRank(p)+"");
 					//HP
 					ChatColor color = ChatColor.GREEN;
@@ -789,7 +801,7 @@ public class CommandManager implements CommandExecutor, Listener {
 					//Display Favor/Ascensions and K/D
 					//float percentage = (DUtil.getDevotion(p)-DUtil.costForNextAscension(DUtil.getAscensions(p)-1))/(float)(DUtil.costForNextAscension(p)-DUtil.costForNextAscension(DUtil.getAscensions(p)-1))*100;
 					String op = ChatColor.YELLOW+"   |   "+(DUtil.costForNextAscension(DUtil.getAscensions(p))-DUtil.getDevotion(p))+" until next Ascension";
-					if (DUtil.getAscensions(p) >= 100)
+					if (DUtil.getAscensions(p) >= DUtil.ASCENSIONCAP)
 						op = "";
 					p.sendMessage("Devotion: "+DUtil.getDevotion(p)+op);
 					p.sendMessage("Favor: "+DUtil.getFavor(p)+ChatColor.YELLOW+"/"+DUtil.getFavorCap(p));
@@ -1167,7 +1179,7 @@ public class CommandManager implements CommandExecutor, Listener {
 					DUtil.toLocation(shrine).getBlock().setType(Material.GOLD_BLOCK);
 				p.sendMessage(ChatColor.YELLOW+"Shrine fixed.");
 				return true;
-			}else if (c.getName().equalsIgnoreCase("removeshrine")) {
+			} else if (c.getName().equalsIgnoreCase("removeshrine")) {
 				if (!(DUtil.hasPermission(p, "demigods.removeshrine") || DUtil.hasPermission(p, "demigods.admin")))
 					return true;
 				if ((args.length == 1) && DUtil.hasPermission(p, "demigods.admin") && args[0].equals("all")) {
@@ -1263,7 +1275,35 @@ public class CommandManager implements CommandExecutor, Listener {
 					p.sendMessage(ChatColor.YELLOW+"Success! "+target+" no longer has that deity.");
 				}
 				return true;
-			} else if (c.getName().equalsIgnoreCase("forsake")) {
+			} else if (c.getName().equalsIgnoreCase("adddevotion")) {
+				if (args.length != 2) {
+					p.sendMessage("/adddevotion <deity name> <amount>");
+					return true;
+				}
+				String deity = args[0];
+				if (!DUtil.hasDeity(p, deity)) {
+					p.sendMessage(ChatColor.YELLOW+"You do not have a deity with the name "+deity+".");
+					return true;
+				}
+				int amount;
+				try {
+					amount = Integer.parseInt(args[1]);
+				} catch (Exception err) {
+					p.sendMessage(ChatColor.YELLOW+""+args[1]+" is not a valid number.");
+					return true;
+				}
+				if (amount > DUtil.getUnclaimedDevotion(p)) {
+					p.sendMessage(ChatColor.YELLOW+"You do not enough unclaimed Devotion.");
+					return true;
+				}
+				Deity d = DUtil.getDeity(p, deity);
+				DUtil.setUnclaimedDevotion(p, DUtil.getUnclaimedDevotion(p)-amount);
+				DUtil.setDevotion(p, d, DUtil.getDevotion(p, d)+amount);
+				p.sendMessage(ChatColor.YELLOW+"Your Devotion for "+d.getName()+" has increased to "+DUtil.getDevotion(p, d)+".");
+				LevelManager.levelProcedure(p);
+				p.sendMessage("You have "+DUtil.getUnclaimedDevotion(p)+" unclaimed Devotion remaining.");
+				return true;
+			}	else if (c.getName().equalsIgnoreCase("forsake")) {
 				if (!(DUtil.hasPermission(p, "demigods.forsake") || DUtil.hasPermission(p, "demigods.admin")))
 					return true;
 				if (!DUtil.isFullParticipant(p))

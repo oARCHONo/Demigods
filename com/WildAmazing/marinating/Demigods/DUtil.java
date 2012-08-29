@@ -16,23 +16,17 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
-
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
 import com.massivecraft.factions.Board;
 import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.Faction;
-import com.massivecraft.factions.Factions;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 public class DUtil {
 	private static Demigods plugin; //obviously needed
-	private static WorldGuardPlugin wg = null;
-	private static Factions fct = null;
 	private static int dist = Settings.getSettingInt("max_target_range"); //maximum range on targeting
 	private static int MAXIMUMHP = Settings.getSettingInt("max_hp"); //max hp a player can have
-	private static int ASCENSIONCAP = Settings.getSettingInt("ascension_cap"); //max levels
+	public static int ASCENSIONCAP = Settings.getSettingInt("ascension_cap"); //max levels
 	private static int FAVORCAP = Settings.getSettingInt("globalfavorcap"); //max favor
 	private static boolean BROADCASTNEWDEITY = Settings.getSettingBoolean("broadcast_new_deities"); //tell server when a player gets a deity
 
@@ -566,6 +560,35 @@ public class DUtil {
 			total += getDevotion(p, d.getName());
 		}
 		return total;
+	}
+	/**
+	 * Get the unclaimed devotion a player has been given.
+	 * @param p
+	 * @return
+	 */
+	public static int getUnclaimedDevotion(Player p) {
+		return getUnclaimedDevotion(p.getName());
+	}
+	public static int getUnclaimedDevotion(String p) {
+		if (!DSave.hasData(p, "U_DVT")) {
+			DSave.saveData(p, "U_DVT", new Integer(0));
+		}
+		try {
+			return (Integer)DSave.getData(p, "U_DVT");
+		} catch (Exception e) {
+			return -1;
+		}
+	}
+	/**
+	 * Set the unclaimed devotion a player has been given.
+	 * @param p
+	 * @param amount
+	 */
+	public static void setUnclaimedDevotion(Player p, int amount) {
+		setUnclaimedDevotion(p.getName(), amount);
+	}
+	public static void setUnclaimedDevotion(String p, int amount) {
+		DSave.saveData(p, "U_DVT", amount);
 	}
 	/**
 	 * Set a player's number of ascensions.
@@ -1306,23 +1329,17 @@ public class DUtil {
 				names.add(s);
 		return names;
 	}
+	@SuppressWarnings("static-access")
 	public static boolean isWorldGuardPVP(Location l) {
-		if (wg == null) {
-			Plugin pg = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
-			if ((pg == null) || !(pg instanceof WorldGuardPlugin))
-				return true;
-			wg = (WorldGuardPlugin)pg;
-		}
-		ApplicableRegionSet set = wg.getRegionManager(l.getWorld()).getApplicableRegions(l);
+		if (plugin.WORLDGUARD == null)
+			return false;
+		ApplicableRegionSet set = plugin.WORLDGUARD.getRegionManager(l.getWorld()).getApplicableRegions(l);
 		return set.allows(DefaultFlag.PVP);
 	}
+	@SuppressWarnings("static-access")
 	public static boolean isFactionsPVP(Location l) {
-		if (fct == null) {
-			Plugin pg = plugin.getServer().getPluginManager().getPlugin("Factions");
-			if ((pg == null) || !(pg instanceof Factions))
-				return true;
-			fct = (Factions)pg;
-		}
+		if (plugin.FACTIONS == null)
+			return false;
 		Faction faction = Board.getFactionAt(new FLocation(l.getBlock()));
 		return (!(faction.isPeaceful() || faction.isSafeZone()));
 	}

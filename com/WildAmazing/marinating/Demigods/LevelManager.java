@@ -100,9 +100,9 @@ public class LevelManager implements Listener {
 	}
 	public static void levelProcedure(String p) {
 		if (DUtil.isFullParticipant(p))
-			if (DUtil.getAscensions(p) >= 100)
+			if (DUtil.getAscensions(p) >= DUtil.ASCENSIONCAP)
 				return;
-		while ((DUtil.getDevotion(p) >= DUtil.costForNextAscension(p)) && (DUtil.getAscensions(p) < 100)) {
+		while ((DUtil.getDevotion(p) >= DUtil.costForNextAscension(p)) && (DUtil.getAscensions(p) < DUtil.ASCENSIONCAP)) {
 			DUtil.setMaxHP(p, DUtil.getMaxHP(p)+10);
 			DUtil.setHP(p, DUtil.getMaxHP(p));
 			DUtil.setAscensions(p, DUtil.getAscensions(p)+1);

@@ -11,19 +11,41 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitWorker;
 
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
-import com.WildAmazing.marinating.Demigods.Deities.Gods.*;
-import com.WildAmazing.marinating.Demigods.Deities.Titans.*;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Ares;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Athena;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Hades;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Hephaestus;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Poseidon;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Zeus;
+import com.WildAmazing.marinating.Demigods.Deities.Titans.Atlas;
+import com.WildAmazing.marinating.Demigods.Deities.Titans.Cronus;
+import com.WildAmazing.marinating.Demigods.Deities.Titans.Hyperion;
+import com.WildAmazing.marinating.Demigods.Deities.Titans.Oceanus;
+import com.WildAmazing.marinating.Demigods.Deities.Titans.Prometheus;
+import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
+import com.massivecraft.factions.P;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 public class Demigods extends JavaPlugin implements Listener {
+	/*
+	 *  Soft dependencies
+	 */
+	protected static WorldGuardPlugin WORLDGUARD = null;
+	protected static P FACTIONS = null;
+	/*
+	 * 
+	 */
 	public static Logger log = Logger.getLogger("Minecraft");
 	static String mainDirectory = "plugins/Demigods/";
 	DUtil initialize;
 	DSave SAVE;
+
 	static Deity[] deities = {
 		new Cronus("ADMIN"),
 		new Prometheus("ADMIN"),
@@ -55,7 +77,8 @@ public class Demigods extends JavaPlugin implements Listener {
 		loadListeners(); // #4
 		loadCommands(); // #5 (needed)
 		initializeThreads(); // #6 (regen and etc)
-		updateSave(); // #7 (updates from older versions)
+		loadDependencies(); // #7 compatibility with protection plugins
+		updateSave(); // #8 (updates from older versions)
 		log.info("[Demigods] Preparation completed in "+((double)(System.currentTimeMillis()-firstTime)/1000)+" seconds.");
 	}
 
@@ -95,6 +118,19 @@ public class Demigods extends JavaPlugin implements Listener {
 			}
 	}
 
+	public void loadDependencies() {
+		Plugin pg = getServer().getPluginManager().getPlugin("WorldGuard");
+		if ((pg != null) && (pg instanceof WorldGuardPlugin)) {
+			WORLDGUARD = (WorldGuardPlugin)pg;
+			log.info("[Demigods] WorldGuard detected. Skills are disabled in no-PvP zones.");
+		}
+		pg = getServer().getPluginManager().getPlugin("Factions");
+		if (pg != null) {
+			FACTIONS = ((P)pg);
+			log.info("[Demigods] Factions detected. Skills are disabled in peaceful zones.");
+		}
+	}
+
 	public void loadCommands() {
 		//for help files
 		CommandManager ce = new CommandManager(this);
@@ -124,6 +160,8 @@ public class Demigods extends JavaPlugin implements Listener {
 		getCommand("givedeity").setExecutor(ce);
 		getCommand("removedeity").setExecutor(ce);
 		getCommand("forsake").setExecutor(ce);
+
+		getCommand("addunclaimeddevotion").setExecutor(ce);
 
 		getCommand("getdevotion").setExecutor(ce);
 		getCommand("setdevotion").setExecutor(ce);
