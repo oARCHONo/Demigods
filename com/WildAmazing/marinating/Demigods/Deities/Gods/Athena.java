@@ -61,7 +61,7 @@ public class Athena implements Deity {
 			//ceasefire duration
 			int duration = (int)Math.ceil(10*Math.pow(devotion, 0.194));
 			int t = (int)(ULTIMATECOOLDOWNMAX - ((ULTIMATECOOLDOWNMAX - ULTIMATECOOLDOWNMIN)*
-					((double)DUtil.getAscensions(p)/100)));
+					((double)DUtil.getAscensions(p)/DUtil.ASCENSIONCAP)));
 			//print
 			p.sendMessage("--"+ChatColor.GOLD+getName()+ChatColor.GRAY+"["+devotion+"]");
 			p.sendMessage(":Use "+ChatColor.YELLOW+"qd <name>"+ChatColor.WHITE+" for detailed information about any player");
@@ -192,7 +192,7 @@ public class Athena implements Deity {
 					int crange = (int)Math.floor(15*Math.pow(devotion, 0.275));
 					int duration = (int)Math.ceil(10*Math.pow(devotion, 0.194));
 					int t = (int)(ULTIMATECOOLDOWNMAX - ((ULTIMATECOOLDOWNMAX - ULTIMATECOOLDOWNMIN)*
-							((double)DUtil.getAscensions(p)/100)));
+							((double)DUtil.getAscensions(p)/DUtil.ASCENSIONCAP)));
 					ULTIMATETIME = System.currentTimeMillis()+(t*1000);
 					p.sendMessage("In exchange for "+ChatColor.AQUA+ULTIMATECOST+ChatColor.WHITE+" Favor, ");
 					for (Player pl : P.getWorld().getPlayers()) {

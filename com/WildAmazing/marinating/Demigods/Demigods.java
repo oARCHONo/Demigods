@@ -2,11 +2,15 @@ package com.WildAmazing.marinating.Demigods;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,6 +21,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitWorker;
 
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Apollo;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Ares;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Athena;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Hades;
@@ -29,6 +34,7 @@ import com.WildAmazing.marinating.Demigods.Deities.Titans.Hyperion;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Oceanus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Prometheus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
+import com.WildAmazing.marinating.Demigods.Deities.Titans.Themis;
 import com.massivecraft.factions.P;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
@@ -53,13 +59,15 @@ public class Demigods extends JavaPlugin implements Listener {
 		new Atlas("ADMIN"),
 		new Oceanus("ADMIN"),
 		new Hyperion("ADMIN"),
+		new Themis("ADMIN"),
 		//
 		new Zeus("ADMIN"),
 		new Ares("ADMIN"),
 		new Hades("ADMIN"),
 		new Poseidon("ADMIN"),
 		new Athena("ADMIN"),
-		new Hephaestus("ADMIN")
+		new Hephaestus("ADMIN"),
+		new Apollo("ADMIN")
 	};
 
 	public Demigods(){
@@ -122,13 +130,16 @@ public class Demigods extends JavaPlugin implements Listener {
 		Plugin pg = getServer().getPluginManager().getPlugin("WorldGuard");
 		if ((pg != null) && (pg instanceof WorldGuardPlugin)) {
 			WORLDGUARD = (WorldGuardPlugin)pg;
-			log.info("[Demigods] WorldGuard detected. Skills are disabled in no-PvP zones.");
+			if (!Settings.getSettingBoolean("allow_skills_everywhere"))
+				log.info("[Demigods] WorldGuard detected. Skills are disabled in no-PvP zones.");
 		}
 		pg = getServer().getPluginManager().getPlugin("Factions");
 		if (pg != null) {
 			FACTIONS = ((P)pg);
-			log.info("[Demigods] Factions detected. Skills are disabled in peaceful zones.");
+			if (!Settings.getSettingBoolean("allow_skills_everywhere"))
+				log.info("[Demigods] Factions detected. Skills are disabled in peaceful zones.");
 		}
+		getServer().getMessenger().registerOutgoingPluginChannel(this, "SimpleNotice");
 	}
 
 	public void loadCommands() {
@@ -185,6 +196,7 @@ public class Demigods extends JavaPlugin implements Listener {
 		getCommand("shrineowner").setExecutor(ce);
 		getCommand("removeshrine").setExecutor(ce);
 		getCommand("fixshrine").setExecutor(ce);
+		getCommand("listshrines").setExecutor(ce);
 		getCommand("nameshrine").setExecutor(ce);
 		//zeus
 		getCommand("shove").setExecutor(ce);
@@ -230,6 +242,13 @@ public class Demigods extends JavaPlugin implements Listener {
 		//hephaestus
 		getCommand("reforge").setExecutor(ce);
 		getCommand("shatter").setExecutor(ce);
+		//apollo
+		getCommand("cure").setExecutor(ce);
+		getCommand("finale").setExecutor(ce);
+		//themis
+		getCommand("swap").setExecutor(ce);
+		getCommand("congregate").setExecutor(ce);
+		getCommand("assemble").setExecutor(ce);
 	}
 
 	public void loadListeners(){
@@ -259,7 +278,7 @@ public class Demigods extends JavaPlugin implements Listener {
 						if (DUtil.isFullParticipant(p)) {
 							int regenrate = DUtil.getAscensions(p); //TODO: PERK UPGRADES THIS
 							if (regenrate < 1) regenrate = 1;
-							DUtil.setFavor(p, DUtil.getFavor(p)+regenrate);
+							DUtil.setFavorQuiet(p.getName(), DUtil.getFavor(p)+regenrate);
 						}
 				}
 			}
@@ -275,7 +294,7 @@ public class Demigods extends JavaPlugin implements Listener {
 							int heal = 1; //TODO: PERK UPGRADES THIS
 							if (heal < 1) heal = 1;
 							if (DUtil.getHP(p) < DUtil.getMaxHP(p))
-								DUtil.setHP(p, DUtil.getHP(p)+heal);
+								DUtil.setHPQuiet(p.getName(), DUtil.getHP(p)+heal);
 						}
 				}
 			}
@@ -291,7 +310,7 @@ public class Demigods extends JavaPlugin implements Listener {
 								DamageHandler.syncHealth(p);
 				}
 			}
-		}, startdelay, 5);
+		}, startdelay, 2);
 		//data save
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
@@ -363,7 +382,40 @@ public class Demigods extends JavaPlugin implements Listener {
 		if (yes)
 			log.info(updated);
 		DSave.overwrite(copy);
+		/*
+		 * Level players
+		 */
 		for (String player : DSave.getCompleteData().keySet())
 			LevelManager.levelProcedure(player);
+		/*
+		 * Remove invalid shrines
+		 */
+		Iterator<WriteLocation> i = DUtil.getAllShrines().iterator();
+		ArrayList<String> worldnames = new ArrayList<String>();
+		for (World w : getServer().getWorlds())
+			worldnames.add(w.getName());
+		int count = 0;
+		while (i.hasNext()) {
+			WriteLocation n = i.next();
+			if (!worldnames.contains(n.getWorld()) || (n.getY() < 0) || (n.getY() > 256)) {
+				count++;
+				DUtil.removeShrine(n);
+			}
+		}
+		if (count > 0)
+			log.info("[Demigods] Removed "+count+" invalid shrines.");
+		/*
+		 * Unstick Prometheus fireballs
+		 */
+		for (World w : Settings.getEnabledWorlds()) {
+			Iterator<Entity> it = w.getEntities().iterator();
+			while (it.hasNext()) {
+				Entity e = it.next();
+				if ((e instanceof net.minecraft.server.EntityFireball) || (e instanceof Fireball)) {
+					e.remove();
+					it.remove();
+				}
+			}
+		}
 	}
 }

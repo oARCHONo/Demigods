@@ -1,5 +1,9 @@
 package com.WildAmazing.marinating.Demigods.Deities.Gods;
 
+/*
+ * This style/format of code is now deprecated.
+ */
+
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -154,9 +158,10 @@ public class Poseidon implements Deity {
 					return;
 				}
 				if (DUtil.getFavor(p) > drownCOST) {
-					drown(p);
-					DUtil.setFavor(p, DUtil.getFavor(p)-drownCOST);
-					drownTIME = System.currentTimeMillis()+DROWNDELAY;
+					if (drown(p)) {
+						DUtil.setFavor(p, DUtil.getFavor(p)-drownCOST);
+						drownTIME = System.currentTimeMillis()+DROWNDELAY;
+					}
 				} else {
 					p.sendMessage(ChatColor.YELLOW+"You do not have enough Favor.");
 					drown = false;
@@ -216,6 +221,10 @@ public class Poseidon implements Deity {
 				return;
 			}
 			if (DUtil.getFavor(p)>=ULTIMATECOST) {
+				if (!DUtil.canPVP(p.getLocation())) {
+					p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+					return;
+				}
 				for (String s : DUtil.getFullParticipants()) {
 					if (DUtil.isFullParticipant(s) && DUtil.getActiveEffectsList(s).contains("Waterfall")) {
 						p.sendMessage(ChatColor.YELLOW+"Another player's Waterfall is already in effect.");
@@ -254,8 +263,13 @@ public class Poseidon implements Deity {
 		}
 	}
 	private boolean reel(Player p) {
+		if (!DUtil.canPVP(p.getLocation())) {
+			return false;
+		}
 		LivingEntity le = DUtil.getTargetLivingEntity(p, 3);
 		if ((le == null) || le.isDead())
+			return false;
+		if (!DUtil.canPVP(le.getLocation()))
 			return false;
 		if (le.getLocation().getBlock().getType() == Material.AIR) {
 			le.getLocation().getBlock().setType(Material.WATER);
@@ -264,23 +278,31 @@ public class Poseidon implements Deity {
 		int damage = (int)Math.ceil(0.37286*Math.pow(DUtil.getDevotion(p, getName()), 0.371238));
 		if (le instanceof Player) {
 			if (DUtil.isFullParticipant((Player)le))
-				if (DUtil.isGod((Player)le))
+				if (DUtil.getAllegiance((Player)le).equalsIgnoreCase(DUtil.getAllegiance(p)))
 					return false;
 		}
-		DUtil.damageDemigods(p, le, damage);
+		DUtil.damageDemigods(p, le, damage, DamageCause.CUSTOM);
 		REELTIME = System.currentTimeMillis();
 		return true;
 	}
-	private void drown(Player p) {
+	private boolean drown(Player p) {
+		if (!DUtil.canPVP(p.getLocation())) {
+			p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+			return false;
+		}
 		//special values
 		int devotion = DUtil.getDevotion(p, getName());
 		int radius = (int)(Math.ceil(1.6955424*Math.pow(devotion, 0.129349)));
 		int duration = (int)Math.ceil(2.80488*Math.pow(devotion, 0.2689)); //seconds
 		//
 		Location target = DUtil.getTargetLocation(p);
-		if (target == null) return;
-		if (!DUtil.isPVP(target)) return;
+		if (!DUtil.canPVP(target)) {
+			p.sendMessage(ChatColor.YELLOW+"That is a no-PVP zone.");
+			return false;
+		}
+		if (target == null) return false;
 		drown(target, radius, duration*20);
+		return true;
 	}
 	private void drown(Location target, int radius, int duration) {
 		final ArrayList<Block> toreset = new ArrayList<Block>();
@@ -289,7 +311,7 @@ public class Poseidon implements Deity {
 				for (int z=-radius; z<=radius;z++) {
 					Block block = target.getWorld().getBlockAt(target.getBlockX()+x, target.getBlockY()+y, target.getBlockZ()+z);
 					if (block.getLocation().distance(target) <= radius) {
-						if (DUtil.isPVP(block.getLocation()))
+						if (DUtil.canPVP(block.getLocation()))
 							if (block.getType() == Material.AIR) {
 								block.setType(Material.WATER);
 								block.setData((byte)(0x8));
@@ -316,9 +338,9 @@ public class Poseidon implements Deity {
 		for (LivingEntity anEntity : p.getWorld().getLivingEntities()){
 			if (anEntity instanceof Player)
 				if (DUtil.isFullParticipant((Player)anEntity))
-					if (DUtil.isGod((Player)anEntity))
+					if (DUtil.getAllegiance((Player)anEntity).equalsIgnoreCase(DUtil.getAllegiance(p)))
 						continue;
-			if (!DUtil.isPVP(anEntity.getLocation()))
+			if (!DUtil.canPVP(anEntity.getLocation()))
 				continue;
 			if (anEntity.getLocation().toVector().isInSphere(ploc, 50.0) && (entitylist.size() < numtargets))
 				entitylist.add(anEntity);

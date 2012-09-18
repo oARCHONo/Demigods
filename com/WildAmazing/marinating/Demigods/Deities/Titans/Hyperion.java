@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -73,7 +74,7 @@ public class Hyperion implements Deity {
 			int ultrange = (int)Math.round(25*Math.pow(devotion, 0.09));
 			int ultdamage = (int)(Math.floor(10*Math.pow(devotion, 0.105)));
 			int t = (int)(ULTIMATECOOLDOWNMAX - ((ULTIMATECOOLDOWNMAX - ULTIMATECOOLDOWNMIN)*
-					((double)DUtil.getAscensions(p)/100)));
+					((double)DUtil.getAscensions(p)/DUtil.ASCENSIONCAP)));
 			/*
 			 * The printed text
 			 */
@@ -160,8 +161,12 @@ public class Hyperion implements Deity {
 					return;
 				}
 				if (DUtil.getFavor(p)>=ULTIMATECOST) {
+					if (!DUtil.canPVP(p.getLocation())) {
+						p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+						return;
+					}
 					int t = (int)(ULTIMATECOOLDOWNMAX - ((ULTIMATECOOLDOWNMAX - ULTIMATECOOLDOWNMIN)*
-							((double)DUtil.getAscensions(p)/100)));
+							((double)DUtil.getAscensions(p)/DUtil.ASCENSIONCAP)));
 					ULTIMATETIME = System.currentTimeMillis()+(t*1000);
 					int num = smite(p);
 					if (num > 0) {
@@ -186,6 +191,10 @@ public class Hyperion implements Deity {
 		}
 	}
 	private int starfall(final Player p) {
+		if (!DUtil.canPVP(p.getLocation())) {
+			p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+			return 0;
+		}
 		int damage = (int)(Math.round(1.4*Math.pow(DUtil.getDevotion(p, getName()), 0.1)));
 		int range = (int)(Math.ceil(8*Math.pow(DUtil.getDevotion(p, getName()), 0.08)));
 		ArrayList<LivingEntity> entitylist = new ArrayList<LivingEntity>();
@@ -193,9 +202,9 @@ public class Hyperion implements Deity {
 		for (LivingEntity anEntity : p.getWorld().getLivingEntities()){
 			if (anEntity instanceof Player)
 				if (DUtil.isFullParticipant((Player)anEntity))
-					if (DUtil.isTitan((Player)anEntity))
+					if (DUtil.getAllegiance((Player)anEntity).equalsIgnoreCase(getDefaultAlliance()))
 						continue;
-			if (!DUtil.isPVP(anEntity.getLocation()))
+			if (!DUtil.canPVP(anEntity.getLocation()))
 				continue;
 			if (anEntity.getLocation().toVector().isInSphere(ploc, range))
 				entitylist.add(anEntity);
@@ -208,7 +217,7 @@ public class Hyperion implements Deity {
 					le.getWorld().playEffect(loc, Effect.SMOKE, (int)(Math.random()*16));
 				}
 			}
-			DUtil.damageDemigods(p, le, damage);
+			DUtil.damageDemigods(p, le, damage, DamageCause.CUSTOM);
 		}
 		return entitylist.size();
 	}
@@ -223,9 +232,9 @@ public class Hyperion implements Deity {
 		for (LivingEntity anEntity : p.getWorld().getLivingEntities()){
 			if (anEntity instanceof Player)
 				if (DUtil.isFullParticipant((Player)anEntity))
-					if (DUtil.isTitan((Player)anEntity))
+					if (DUtil.getAllegiance((Player)anEntity).equalsIgnoreCase(getDefaultAlliance()))
 						continue;
-			if (!DUtil.isPVP(anEntity.getLocation()))
+			if (!DUtil.canPVP(anEntity.getLocation()))
 				continue;
 			if (anEntity.getLocation().toVector().isInSphere(ploc, ultrange) && (entitylist.size() < numtargets))
 				entitylist.add(anEntity);
@@ -239,7 +248,7 @@ public class Hyperion implements Deity {
 				@Override
 				public void run() {
 					p.teleport(le.getLocation());
-					DUtil.damageDemigods(p, le, ultdamage);
+					DUtil.damageDemigods(p, le, ultdamage, DamageCause.CUSTOM);
 				}
 			}, delay);
 		}

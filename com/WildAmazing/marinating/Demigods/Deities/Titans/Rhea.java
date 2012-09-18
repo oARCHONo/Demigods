@@ -12,6 +12,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -27,9 +28,9 @@ public class Rhea implements Deity {
 	private static final long serialVersionUID = 4917938727569988533L;
 	private final int POISONCOST = 50;
 	private final int PLANTCOST = 100;
-	private final int RHEAULTIMATECOST = 6500;
+	private final int RHEAULTIMATECOST = 5500;
 	private final int RHEAULTIMATECOOLDOWNMAX = 500;
-	private final int RHEAULTIMATECOOLDOWNMIN = 80;
+	private final int RHEAULTIMATECOOLDOWNMIN = 120;
 	private final int POISONDELAY = 1500; //milliseconds
 	private final int PLANTDELAY = 2000;
 
@@ -74,9 +75,9 @@ public class Rhea implements Deity {
 			 * Calculate special values first
 			 */
 			//poison
-			int duration = (int)Math.ceil(2.4063*Math.pow(devotion, 0.1921)); //seconds
+			int duration = (int)Math.ceil(2.4063*Math.pow(devotion, 0.11)); //seconds
 			if (duration < 1) duration = 1;
-			int strength = (int)Math.ceil(4*Math.pow(devotion, 0.09));
+			int strength = (int)Math.ceil(1*Math.pow(devotion, 0.09));
 			//explosion
 			float explosionsize = (float)(Math.ceil(3*Math.pow(devotion, 0.09)));
 			//ultimate
@@ -284,6 +285,10 @@ public class Rhea implements Deity {
 				return;
 			}
 			if (DUtil.getFavor(p)>=RHEAULTIMATECOST) {
+				if (!DUtil.canPVP(p.getLocation())) {
+					p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+					return;
+				}
 				int t = (int)(RHEAULTIMATECOOLDOWNMAX - ((RHEAULTIMATECOOLDOWNMAX - RHEAULTIMATECOOLDOWNMIN)*
 						((double)DUtil.getAscensions(p)/100)));
 				int hit = entangle(p);
@@ -301,15 +306,19 @@ public class Rhea implements Deity {
 
 	}
 	private boolean poison(Player p) {
+		if (!DUtil.canPVP(p.getLocation())) {
+			p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+			return false;
+		}
 		int devotion = DUtil.getDevotion(p, getName());
-		int duration = (int)Math.ceil(2.4063*Math.pow(devotion, 0.1921)); //seconds
+		int duration = (int)Math.ceil(2.4063*Math.pow(devotion, 0.11)); //seconds
 		if (duration < 1) duration = 1;
-		int strength = (int)Math.ceil(4*Math.pow(devotion, 0.09));
+		int strength = (int)Math.ceil(1*Math.pow(devotion, 0.09));
 		Player target = null;
 		Block b = p.getTargetBlock(null, 200);
 		for (Player pl : b.getWorld().getPlayers()) {
 			if (pl.getLocation().distance(b.getLocation()) < 4) {
-				if (!DUtil.isTitan(pl)){
+				if (!DUtil.areAllied(p, pl)){
 					target = pl;
 					break;
 				}
@@ -318,15 +327,6 @@ public class Rhea implements Deity {
 		if (target != null) {
 			target.addPotionEffect(new PotionEffect(PotionEffectType.POISON, duration*20, strength));
 			DUtil.addActiveEffect(target.getName(), "Poison", duration);
-			/*		for (int i=0;i<duration*20;i+=20) {
-				DUtil.getPlugin().getServer().getScheduler().scheduleAsyncDelayedTask(DUtil.getPlugin(), new Runnable() {
-					@Override
-					public void run() {
-						if (pt.getHealth() > 9)
-							pt.setHealth((int)Math.ceil(pt.getHealth()*0.85));
-					}
-				}, duration*20);
-			} */
 			p.sendMessage(ChatColor.YELLOW+target.getName()+" has been poisoned for "+duration+" seconds.");
 			target.sendMessage(ChatColor.RED+"You have been poisoned for "+duration+" seconds.");
 			return true;
@@ -336,9 +336,13 @@ public class Rhea implements Deity {
 		}
 	}
 	private boolean plant(Player player){
+		if (!DUtil.canPVP(player.getLocation())) {
+			player.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+			return false;
+		}
 		Block b = player.getTargetBlock(null, 200);
 		if (b!=null) {
-			if (!DUtil.isPVP(b.getLocation())) {
+			if (!DUtil.canPVP(b.getLocation())) {
 				player.sendMessage(ChatColor.YELLOW+"That is a protected area.");
 				return false;
 			}
@@ -404,13 +408,13 @@ public class Rhea implements Deity {
 				if (le instanceof Player) {
 					Player pl = (Player)le;
 					if (DUtil.isFullParticipant(pl)) {
-						if (!DUtil.isTitan(pl)) {
+						if (!DUtil.areAllied(p, pl)) {
 							trap(le, duration, p);
 							count++;
 						} else continue;
 					}
 				}
-				if (DUtil.isPVP(le.getLocation())) {
+				if (DUtil.canPVP(le.getLocation())) {
 					count++;
 					trap(le, duration, p);
 				}
@@ -488,7 +492,7 @@ public class Rhea implements Deity {
 							return;
 						if (le instanceof Player)
 							((Player)le).sendMessage(ChatColor.YELLOW+"You take damage from moving while entangled!");
-						DUtil.damageDemigods(p, le, 12);
+						DUtil.damageDemigods(p, le, 5, DamageCause.CUSTOM);
 					}
 					le.teleport(originalloc);
 				}

@@ -13,6 +13,7 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -248,6 +249,10 @@ public class Hades implements Deity {
 				return;
 			}
 			if (DUtil.getFavor(p)>=ULTIMATECOST) {
+				if (!DUtil.canPVP(p.getLocation())) {
+					p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+					return;
+				}
 				int t = (int)(ULTIMATECOOLDOWNMAX - ((ULTIMATECOOLDOWNMAX - ULTIMATECOOLDOWNMIN)*
 						((double)DUtil.getAscensions(p)/100)));
 				int amt = tartarus(p);
@@ -263,20 +268,26 @@ public class Hades implements Deity {
 	}
 
 	private boolean chain(Player p, int damage, int blindpower, int blindduration) {
-		if (!DUtil.isPVP(p.getLocation()))
+		if (!DUtil.canPVP(p.getLocation()))
 			return false;
+		if (!DUtil.canPVP(p.getLocation())) {
+			return false;
+		}
 		LivingEntity target = DUtil.getTargetLivingEntity(p, 3);
 		if (target == null) return false;
 		target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, blindduration, blindpower));
-		DUtil.damageDemigods(p, target, damage);
+		DUtil.damageDemigods(p, target, damage, DamageCause.CUSTOM);
 		for (BlockFace bf : BlockFace.values()) {
 			p.getWorld().playEffect(target.getLocation().getBlock().getRelative(bf).getLocation(), Effect.SMOKE, 1);
 		}
 		return true;
 	}
 	private boolean entomb(Player p) {
-		if (!DUtil.isPVP(p.getLocation()))
+		if (!DUtil.canPVP(p.getLocation()))
 			return false;
+		if (!DUtil.canPVP(p.getLocation())) {
+			return false;
+		}
 		int duration = (int)Math.round(2.18678*Math.pow(DUtil.getDevotion(p, "Hades"), 0.24723)); //seconds
 		LivingEntity le = DUtil.getTargetLivingEntity(p, 2);
 		if (le == null)
@@ -312,7 +323,7 @@ public class Hades implements Deity {
 		for (LivingEntity anEntity : p.getWorld().getLivingEntities()){
 			if (anEntity instanceof Player)
 				if (DUtil.isFullParticipant((Player)anEntity))
-					if (DUtil.isGod((Player)anEntity))
+					if (DUtil.areAllied((Player)anEntity, p))
 						continue;
 			if (anEntity.getLocation().toVector().isInSphere(ploc, range))
 				entitylist.add(anEntity);

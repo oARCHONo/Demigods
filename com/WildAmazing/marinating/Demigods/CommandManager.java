@@ -13,14 +13,18 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.util.Vector;
 
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Apollo;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Ares;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Athena;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Hades;
@@ -33,6 +37,7 @@ import com.WildAmazing.marinating.Demigods.Deities.Titans.Hyperion;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Oceanus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Prometheus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
+import com.WildAmazing.marinating.Demigods.Deities.Titans.Themis;
 
 public class CommandManager implements CommandExecutor, Listener {
 	Demigods plugin;
@@ -68,7 +73,7 @@ public class CommandManager implements CommandExecutor, Listener {
 							other = DUtil.getDemigodsPlayer(other);
 						if ((other != null) && DUtil.isFullParticipant(other)) {
 							p.sendMessage(other+" -- "+DUtil.getAllegiance(other));
-							if (DUtil.hasDeity(p, "Athena")) {
+							if (DUtil.hasDeity(p, "Athena") || DUtil.hasDeity(p, "Themis")) {
 								String st = ChatColor.GRAY+"Deities:";
 								for (Deity d : DUtil.getDeities(other))
 									st += " "+d.getName();
@@ -89,6 +94,26 @@ public class CommandManager implements CommandExecutor, Listener {
 					e.setCancelled(true);
 				}
 			}
+		} else if (e.getMessage().equals("dg")) {
+			HashMap<String, ArrayList<String>> alliances = new HashMap<String, ArrayList<String>>();
+			for (Player pl : DUtil.getPlugin().getServer().getOnlinePlayers()) {
+				if (Settings.getEnabledWorlds().contains(pl.getWorld())) {
+					if (DUtil.isFullParticipant(pl)) {
+						if (!alliances.containsKey(DUtil.getAllegiance(pl).toUpperCase())) {
+							alliances.put(DUtil.getAllegiance(pl).toUpperCase(), new ArrayList<String>());
+						}
+						alliances.get(DUtil.getAllegiance(pl).toUpperCase()).add(pl.getName());
+					}
+				}
+			}
+			for (String alliance : alliances.keySet()) {
+				String names = "";
+				for (String name : alliances.get(alliance))
+					names+=" "+name;
+				p.sendMessage(ChatColor.YELLOW+alliance+": "+ChatColor.WHITE+names);
+			}
+			e.getRecipients().clear();
+			e.setCancelled(true);
 		}
 	}
 	@Override
@@ -319,8 +344,17 @@ public class CommandManager implements CommandExecutor, Listener {
 			if (c.getName().equalsIgnoreCase("dg")) {
 				if ((args.length == 1) && args[0].equals("db") && p.getName().equals("WildAmazing")) {
 					p.sendMessage("-DEBUG-");
-					p.sendMessage(p.getItemInHand().getDurability()+"");
-					p.getItemInHand().setDurability((short)200);
+					for (LivingEntity le : p.getWorld().getLivingEntities()) {
+						Location target = le.getLocation();
+						Location start = target;
+						start.setY(start.getBlockY()+4);
+						Arrow ar = target.getWorld().spawnArrow(start, new Vector(0, -5, 0), 5, (float)0.2);
+						ar.setVelocity(new Vector(0, -5, 0));
+						if (Math.random() > 0.7)
+							ar.setFireTicks(500);
+					}
+					//		p.sendMessage("can worldguard: "+DUtil.canWorldGuardPVP(p.getLocation())+" can factions: "+DUtil.canFactionsPVP(p.getLocation()));
+					//		p.sendMessage("can pvp: "+DUtil.canPVP(p.getLocation()));
 				}
 				if ((args.length == 2) || (args.length == 3)) {
 					if (args[0].equalsIgnoreCase("debug") && DUtil.hasPermissionOrOP(p, "demigods.admin")) {
@@ -387,7 +421,9 @@ public class CommandManager implements CommandExecutor, Listener {
 					p.sendMessage(ChatColor.DARK_AQUA+"Support this plugin with a donation at http://bit.ly/helpdemigods");
 				}
 				if (args.length == 1) {
-					if (args[0].equalsIgnoreCase("god")) {
+					if (args[0].equalsIgnoreCase("check"))
+						checkCode(p);
+					else if (args[0].equalsIgnoreCase("god")) {
 						p.sendMessage(ChatColor.YELLOW+"[Demigods] God Help File");
 						p.sendMessage(ChatColor.GRAY+"For more information on the Gods, use /dg <name>");
 						p.sendMessage(ChatColor.GOLD+"----Tier 1");
@@ -398,8 +434,8 @@ public class CommandManager implements CommandExecutor, Listener {
 						p.sendMessage(ChatColor.GRAY+"Ares - God of war.");
 						p.sendMessage(ChatColor.GRAY+"Athena - Goddess of wisdom.");
 						p.sendMessage(ChatColor.GRAY+"Hephaestus - God of the forge.");
+						p.sendMessage(ChatColor.GRAY+"Apollo - God of archery and healing.");
 						/*
-					p.sendMessage(ChatColor.GRAY+"Apollo - God of archery and healing.");
 					p.sendMessage(ChatColor.GOLD+"----Tier 3");
 					p.sendMessage(ChatColor.GRAY+"Artemis - Goddess of the hunt.");
 					p.sendMessage(ChatColor.GRAY+"Demeter - Goddess of the harvest.");
@@ -418,8 +454,8 @@ public class CommandManager implements CommandExecutor, Listener {
 						p.sendMessage(ChatColor.GRAY+"Atlas - Titan of enduring.");
 						p.sendMessage(ChatColor.GRAY+"Oceanus - Titan of the oceans.");
 						p.sendMessage(ChatColor.GRAY+"Hyperion - Titan of light.");
+						p.sendMessage(ChatColor.GRAY+"Themis - Titaness of diplomacy and foresight.");
 						/*
-					p.sendMessage(ChatColor.GRAY+"Themis - Titaness of order and foresight.");
 					p.sendMessage(ChatColor.GOLD+"----Tier 3");
 					p.sendMessage(ChatColor.GRAY+"Lelantos - Titan of the predator.");
 					p.sendMessage(ChatColor.GRAY+"Perses - Titan of destruction.");
@@ -506,22 +542,20 @@ public class CommandManager implements CommandExecutor, Listener {
 								if (!DUtil.isFullParticipant(id)) continue;
 								if (DSave.hasData(id, "LASTLOGINTIME"))
 									if ((Long)DSave.getData(id, "LASTLOGINTIME") < System.currentTimeMillis()-604800000) continue;
-								if (DUtil.isTitan(id)) {
+								if (DUtil.getAllegiance(id).equalsIgnoreCase("titan")) {
 									titancount++;
 									titankills += DUtil.getKills(id);
 									titandeaths += DUtil.getDeaths(id);
 									if (DUtil.getPlugin().getServer().getPlayer(id).isOnline()) {
 										onlinetitans.add(id);
 									}
-								} else if (DUtil.isGod(id)) {
-									if (!DUtil.isFullParticipant(id)) continue;
-									if (DUtil.isGod(id)) {
-										godcount++;
-										godkills += DUtil.getKills(id);
-										goddeaths += DUtil.getDeaths(id);
-										if (DUtil.getPlugin().getServer().getPlayer(id).isOnline()) {
-											onlinegods.add(id);
-										}
+								} else if (DUtil.getAllegiance(id).equalsIgnoreCase("god")) {
+
+									godcount++;
+									godkills += DUtil.getKills(id);
+									goddeaths += DUtil.getDeaths(id);
+									if (DUtil.getPlugin().getServer().getPlayer(id).isOnline()) {
+										onlinegods.add(id);
 									}
 								} else {
 									if (!DUtil.isFullParticipant(id)) continue;
@@ -582,12 +616,12 @@ public class CommandManager implements CommandExecutor, Listener {
 						ArrayList<Long> gr = new ArrayList<Long>();
 						ArrayList<Long> tr = new ArrayList<Long>();
 						for (String s : DUtil.getFullParticipants()) {
-							if (DUtil.isGod(s)) {
+							if (DUtil.getAllegiance(s).equalsIgnoreCase("god")) {
 								if (DSave.hasData(s, "LASTLOGINTIME"))
 									if ((Long)DSave.getData(s, "LASTLOGINTIME") < System.currentTimeMillis()-604800000) continue;
 								gods.add(s);
 								gr.add(DUtil.getRanking(s));
-							} else if (DUtil.isTitan(s)) {
+							} else if (DUtil.getAllegiance(s).equalsIgnoreCase("titan")) {
 								if (DSave.hasData(s, "LASTLOGINTIME"))
 									if ((Long)DSave.getData(s, "LASTLOGINTIME") < System.currentTimeMillis()-604800000) continue;
 								titans.add(s);
@@ -651,13 +685,17 @@ public class CommandManager implements CommandExecutor, Listener {
 						if (gp > 5) gp = 5;
 						p.sendMessage(ChatColor.GOLD+"-- Gods");
 						for (int i=0;i<gp;i++) {
-							p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Gods[i]+" :: "+GR[i]);
+							if (DUtil.getOnlinePlayer(Gods[i]) != null)
+								p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Gods[i]+" :: "+GR[i]);
+							else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Gods[i]+" :: "+GR[i]);
 						}
 						int tp = Titans.length;
 						if (tp > 5) tp = 5;
 						p.sendMessage(ChatColor.DARK_RED+"-- Titans");
 						for (int i=0;i<tp;i++) {
-							p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
+							if (DUtil.getOnlinePlayer(Titans[i]) != null)
+								p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
+							else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
 						}
 						p.sendMessage(ChatColor.GRAY+"To see the full list, use "+ChatColor.YELLOW+"/dg rankings god|titan");
 					}	else {
@@ -673,7 +711,7 @@ public class CommandManager implements CommandExecutor, Listener {
 							ArrayList<String> gods = new ArrayList<String>();
 							ArrayList<Long> gr = new ArrayList<Long>();
 							for (String s : DUtil.getFullParticipants()) {
-								if (DUtil.isGod(s)) {
+								if (DUtil.getAllegiance(s).equalsIgnoreCase("god")) {
 									if (DSave.hasData(s, "LASTLOGINTIME"))
 										if ((Long)DSave.getData(s, "LASTLOGINTIME") < System.currentTimeMillis()-604800000) continue;
 									gods.add(s);
@@ -712,14 +750,16 @@ public class CommandManager implements CommandExecutor, Listener {
 							p.sendMessage(ChatColor.GRAY+"----God Rankings----");
 							p.sendMessage(ChatColor.GRAY+"Rankings are determined by Devotion, Deities, and Kills.");
 							for (int i=0;i<Gods.length;i++) {
-								p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Gods[i]+" :: "+GR[i]);
+								if (DUtil.getOnlinePlayer(Gods[i]) != null)
+									p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Gods[i]+" :: "+GR[i]);
+								else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Gods[i]+" :: "+GR[i]);
 							}
 						} else if (args[1].equalsIgnoreCase("titan")) {
 							//get list of titans
 							ArrayList<String> titans = new ArrayList<String>();
 							ArrayList<Long> tr = new ArrayList<Long>();
 							for (String s : DUtil.getFullParticipants()) {
-								if (DUtil.isTitan(s)) {
+								if (DUtil.getAllegiance(s).equalsIgnoreCase("titan")) {
 									if (DSave.hasData(s, "LASTLOGINTIME"))
 										if ((Long)DSave.getData(s, "LASTLOGINTIME") < System.currentTimeMillis()-604800000) continue;
 									titans.add(s);
@@ -759,7 +799,9 @@ public class CommandManager implements CommandExecutor, Listener {
 							p.sendMessage(ChatColor.GRAY+"----Titan Rankings----");
 							p.sendMessage(ChatColor.GRAY+"Rankings are determined by Devotion, Deities, and Kills.");
 							for (int i=0;i<Titans.length;i++) {
-								p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
+								if (DUtil.getOnlinePlayer(Titans[i]) != null)
+									p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
+								else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
 							}
 						} else if (args[1].equalsIgnoreCase("god|titan")) {
 							p.sendMessage("Try "+ChatColor.YELLOW+"/dg ranking god"+ChatColor.WHITE+" or "+ChatColor.YELLOW+"/dg ranking titan");
@@ -776,56 +818,7 @@ public class CommandManager implements CommandExecutor, Listener {
 				}
 				return true;
 			} else if (c.getName().equalsIgnoreCase("check")) {
-				if (!DUtil.isFullParticipant(p)) {
-					p.sendMessage(ChatColor.YELLOW+"--"+p.getName()+"--Mortal--");
-					p.sendMessage("You are not affiliated with any Gods or Titans.");
-					return true;
-				}
-				if (DUtil.isGod(p) || DUtil.isTitan(p)) {
-					if (DUtil.getUnclaimedDevotion(p) > 0) {
-						p.sendMessage(ChatColor.AQUA+"You have "+DUtil.getUnclaimedDevotion(p)+" unclaimed Devotion.");
-						p.sendMessage(ChatColor.AQUA+"Allocate it with /adddevotion <deity> <amount>.");
-					}
-					p.sendMessage(ChatColor.YELLOW+"--"+p.getName()+"--"+DUtil.getRank(p)+"");
-					//HP
-					ChatColor color = ChatColor.GREEN;
-					if ((DUtil.getHP(p)/(double)DUtil.getMaxHP(p)) < 0.25) color = ChatColor.RED;
-					else if ((DUtil.getHP(p)/(double)DUtil.getMaxHP(p)) < 0.5) color = ChatColor.YELLOW;
-					p.sendMessage("HP: "+color+DUtil.getHP(p)+"/"+DUtil.getMaxHP(p));
-					//List deities
-					String send = "Your deities are:";
-					for (Deity d : DUtil.getDeities(p)){
-						send+=" "+d.getName()+" "+ChatColor.YELLOW+"<"+DUtil.getDevotion(p, d)+">"+ChatColor.WHITE;
-					}
-					p.sendMessage(send);
-					//Display Favor/Ascensions and K/D
-					//float percentage = (DUtil.getDevotion(p)-DUtil.costForNextAscension(DUtil.getAscensions(p)-1))/(float)(DUtil.costForNextAscension(p)-DUtil.costForNextAscension(DUtil.getAscensions(p)-1))*100;
-					String op = ChatColor.YELLOW+"   |   "+(DUtil.costForNextAscension(DUtil.getAscensions(p))-DUtil.getDevotion(p))+" until next Ascension";
-					if (DUtil.getAscensions(p) >= DUtil.ASCENSIONCAP)
-						op = "";
-					p.sendMessage("Devotion: "+DUtil.getDevotion(p)+op);
-					p.sendMessage("Favor: "+DUtil.getFavor(p)+ChatColor.YELLOW+"/"+DUtil.getFavorCap(p));
-					p.sendMessage("Ascensions: "+DUtil.getAscensions(p));
-					p.sendMessage("Kills: "+ChatColor.GREEN+DUtil.getKills(p)+ChatColor.WHITE+" // "+
-							"Deaths: "+ChatColor.RED+DUtil.getDeaths(p));
-					//Deity information
-					if (DUtil.getAscensions(p) < DUtil.costForNextDeity(p))
-						p.sendMessage("You may form a new alliance at "+ChatColor.GOLD+
-								DUtil.costForNextDeity(p)+ChatColor.WHITE+" Ascensions.");
-					else {
-						p.sendMessage(ChatColor.AQUA+"You are eligible for a new alliance.");
-					}
-					//Effects
-					if (DUtil.getActiveEffects(p.getName()).size() > 0) {
-						String printout = ChatColor.YELLOW+"Active effects:";
-						HashMap<String, Long> fx = DUtil.getActiveEffects(p.getName());
-						for (String str : fx.keySet()) {
-							printout += " "+str+"["+(Math.round(fx.get(str)-System.currentTimeMillis())/1000)+"s]";
-						}
-						p.sendMessage(printout);
-					}
-				}
-				return true;
+				return checkCode(p);
 			} /*else if (c.getName().equalsIgnoreCase("transfer")) {
 				if (!DUtil.isFullParticipant(p))
 					return true;
@@ -1179,7 +1172,23 @@ public class CommandManager implements CommandExecutor, Listener {
 					DUtil.toLocation(shrine).getBlock().setType(Material.GOLD_BLOCK);
 				p.sendMessage(ChatColor.YELLOW+"Shrine fixed.");
 				return true;
-			} else if (c.getName().equalsIgnoreCase("removeshrine")) {
+			} else if (c.getName().equalsIgnoreCase("listshrines")) {
+				if (!(DUtil.hasPermission(p, "demigods.listshrines") || DUtil.hasPermission(p, "demigods.admin")))
+					return true;
+				String str = "";
+				for (WriteLocation w : DUtil.getAllShrines()) {
+					String toadd = DUtil.getShrineName(w);
+					if (!str.contains(toadd))
+						str += toadd+", ";
+				}
+				if (str.length() > 3)
+					str = str.substring(0, str.length()-2);
+				if (str.length() > 0)
+					p.sendMessage(str);
+				else p.sendMessage(ChatColor.YELLOW+"No shrines found.");
+				return true;
+			}
+			else if (c.getName().equalsIgnoreCase("removeshrine")) {
 				if (!(DUtil.hasPermission(p, "demigods.removeshrine") || DUtil.hasPermission(p, "demigods.admin")))
 					return true;
 				if ((args.length == 1) && DUtil.hasPermission(p, "demigods.admin") && args[0].equals("all")) {
@@ -1258,6 +1267,8 @@ public class CommandManager implements CommandExecutor, Listener {
 					else if (s.equals("oceanus")) DUtil.giveDeity(target, new Oceanus(target));
 					else if (s.equals("hyperion")) DUtil.giveDeity(target, new Hyperion(target));
 					else if (s.equals("hephaestus")) DUtil.giveDeity(target, new Hephaestus(target));
+					else if (s.equals("apollo")) DUtil.giveDeity(target, new Apollo(target));
+					else if (s.equals("themis")) DUtil.giveDeity(target, new Themis(target));
 					p.sendMessage(ChatColor.YELLOW+"Success! "+target+" now has the deity "+args[1]+".");
 					p.sendMessage(ChatColor.YELLOW+"Skills may not work if you mismatch Titans and Gods.");
 				}
@@ -1535,7 +1546,8 @@ public class CommandManager implements CommandExecutor, Listener {
 				if (DSave.hasPlayer(toremove)) {
 					p.sendMessage(ChatColor.YELLOW+toremove.getName()+ " was successfully removed from the save.");
 					DSave.removePlayer(toremove);
-					DSave.removeItem("plugins/Demigods/Players/"+toremove.getName()+".dem");
+					p.kickPlayer("Save removed. Please log in again.");
+
 				} else p.sendMessage(ChatColor.YELLOW+"That player is not in the save.");
 				return true;
 			} else if (c.getName().equalsIgnoreCase("claim")) {
@@ -1600,6 +1612,8 @@ public class CommandManager implements CommandExecutor, Listener {
 				case BONE: choice = new Hades(p.getName()); break;
 				case GOLD_SWORD: choice = new Ares(p.getName()); break;
 				case BOOK: choice = new Athena(p.getName()); break;
+				case FURNACE: choice = new Hephaestus(p.getName()); break;
+				case JUKEBOX: choice = new Apollo(p.getName()); break;
 				//
 				case SOUL_SAND: choice = new Cronus(p.getName()); break;
 				case CLAY_BALL: choice = new Prometheus(p.getName()); break;
@@ -1607,7 +1621,7 @@ public class CommandManager implements CommandExecutor, Listener {
 				case OBSIDIAN: choice = new Atlas(p.getName()); break;
 				case INK_SACK: choice = new Oceanus(p.getName()); break;
 				case GLOWSTONE: choice = new Hyperion(p.getName()); break;
-				case FURNACE: choice = new Hephaestus(p.getName()); break;
+				case COMPASS: choice = new Themis(p.getName()); break;
 				}
 				if (choice == null) {
 					p.sendMessage(ChatColor.YELLOW+"That is not a valid selection item.");
@@ -1680,6 +1694,21 @@ public class CommandManager implements CommandExecutor, Listener {
 				}
 				else p.sendMessage(ChatColor.YELLOW+"You have no bindings.");
 				return true;
+			} else if (c.getName().equalsIgnoreCase("assemble")) {
+				if (!DUtil.isFullParticipant(p))
+					return true;
+				if (!DUtil.getActiveEffectsList(p.getName()).contains("Congregate"))
+					return true;
+				for (Player pl : p.getWorld().getPlayers()) {
+					if (DUtil.isFullParticipant(pl) && DUtil.getActiveEffectsList(pl.getName()).contains("Congregate Call")) {
+						DUtil.removeActiveEffect(p.getName(), "Congregate");
+						DUtil.addActiveEffect(p.getName(), "Ceasefire", 60);
+						p.teleport(pl.getLocation());
+						return true;
+					}
+				}
+				p.sendMessage(ChatColor.YELLOW+"Unable to reach the congregation's location.");
+				return true;
 			}
 			else if (c.isRegistered()) {
 				if (!Settings.getEnabledWorlds().contains(p.getWorld())) {
@@ -1697,5 +1726,54 @@ public class CommandManager implements CommandExecutor, Listener {
 			return false;
 		}
 	}
-
+	private boolean checkCode(Player p) {
+		if (!DUtil.isFullParticipant(p)) {
+			p.sendMessage(ChatColor.YELLOW+"--"+p.getName()+"--Mortal--");
+			p.sendMessage("You are not affiliated with any Gods or Titans.");
+			return true;
+		}
+		if (DUtil.getUnclaimedDevotion(p) > 0) {
+			p.sendMessage(ChatColor.AQUA+"You have "+DUtil.getUnclaimedDevotion(p)+" unclaimed Devotion.");
+			p.sendMessage(ChatColor.AQUA+"Allocate it with /adddevotion <deity> <amount>.");
+		}
+		p.sendMessage(ChatColor.YELLOW+"--"+p.getName()+"--"+DUtil.getRank(p)+"");
+		//HP
+		ChatColor color = ChatColor.GREEN;
+		if ((DUtil.getHP(p)/(double)DUtil.getMaxHP(p)) < 0.25) color = ChatColor.RED;
+		else if ((DUtil.getHP(p)/(double)DUtil.getMaxHP(p)) < 0.5) color = ChatColor.YELLOW;
+		p.sendMessage("HP: "+color+DUtil.getHP(p)+"/"+DUtil.getMaxHP(p));
+		//List deities
+		String send = "Your deities are:";
+		for (Deity d : DUtil.getDeities(p)){
+			send+=" "+d.getName()+" "+ChatColor.YELLOW+"<"+DUtil.getDevotion(p, d)+">"+ChatColor.WHITE;
+		}
+		p.sendMessage(send);
+		//Display Favor/Ascensions and K/D
+		//float percentage = (DUtil.getDevotion(p)-DUtil.costForNextAscension(DUtil.getAscensions(p)-1))/(float)(DUtil.costForNextAscension(p)-DUtil.costForNextAscension(DUtil.getAscensions(p)-1))*100;
+		String op = ChatColor.YELLOW+"   |   "+(DUtil.costForNextAscension(DUtil.getAscensions(p))-DUtil.getDevotion(p))+" until next Ascension";
+		if (DUtil.getAscensions(p) >= DUtil.ASCENSIONCAP)
+			op = "";
+		p.sendMessage("Devotion: "+DUtil.getDevotion(p)+op);
+		p.sendMessage("Favor: "+DUtil.getFavor(p)+ChatColor.YELLOW+"/"+DUtil.getFavorCap(p));
+		p.sendMessage("Ascensions: "+DUtil.getAscensions(p));
+		p.sendMessage("Kills: "+ChatColor.GREEN+DUtil.getKills(p)+ChatColor.WHITE+" // "+
+				"Deaths: "+ChatColor.RED+DUtil.getDeaths(p));
+		//Deity information
+		if (DUtil.getAscensions(p) < DUtil.costForNextDeity(p))
+			p.sendMessage("You may form a new alliance at "+ChatColor.GOLD+
+					DUtil.costForNextDeity(p)+ChatColor.WHITE+" Ascensions.");
+		else {
+			p.sendMessage(ChatColor.AQUA+"You are eligible for a new alliance.");
+		}
+		//Effects
+		if (DUtil.getActiveEffects(p.getName()).size() > 0) {
+			String printout = ChatColor.YELLOW+"Active effects:";
+			HashMap<String, Long> fx = DUtil.getActiveEffects(p.getName());
+			for (String str : fx.keySet()) {
+				printout += " "+str+"["+(Math.round(fx.get(str)-System.currentTimeMillis())/1000)+"s]";
+			}
+			p.sendMessage(printout);
+		}
+		return true;
+	}
 }

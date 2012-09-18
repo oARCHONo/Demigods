@@ -8,6 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -194,6 +195,10 @@ public class Ares implements Deity {
 					return;
 				}
 				if (DUtil.getFavor(p)>=ARESULTIMATECOST) {
+					if (!DUtil.canPVP(p.getLocation())) {
+						p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+						return;
+					}
 					int hits = crash(p);
 					if (hits < 1) {
 						p.sendMessage(ChatColor.YELLOW+"No targets were found, or the skill could not be used.");
@@ -224,7 +229,7 @@ public class Ares implements Deity {
 			p.sendMessage(ChatColor.YELLOW+"No target found.");
 			return false;
 		}
-		if (!DUtil.isPVP(target.getLocation())) {
+		if (!DUtil.canPVP(target.getLocation()) || !DUtil.canPVP(p.getLocation())) {
 			p.sendMessage(ChatColor.YELLOW+"Can't attack in a no-PVP zone.");
 			return false;
 		}
@@ -239,7 +244,7 @@ public class Ares implements Deity {
 		/*
 		 * Deal damage and slow if player
 		 */
-		DUtil.damageDemigods(p, target, damage);
+		DUtil.damageDemigods(p, target, damage, DamageCause.ENTITY_ATTACK);
 		target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, duration, slowpower));
 		return true;
 	}
@@ -262,9 +267,9 @@ public class Ares implements Deity {
 			if (le.getLocation().distance(p.getLocation()) <= range) {
 				if (le instanceof Player) {
 					Player pt = (Player)le;
-					if (DUtil.isGod(pt) || pt.equals(p))
+					if (DUtil.getAllegiance(pt).equals(DUtil.getAllegiance(p)) || pt.equals(p))
 						continue;
-					if (!DUtil.isPVP(le.getLocation()))
+					if (!DUtil.canPVP(le.getLocation()))
 						continue;
 					targets.add(le);
 					confuse.add(pt);
@@ -276,7 +281,7 @@ public class Ares implements Deity {
 				Vector v = le.getLocation().toVector();
 				Vector victor = p.getLocation().toVector().subtract(v);
 				le.setVelocity(victor);
-				DUtil.damageDemigods(p, le, damage);
+				DUtil.damageDemigods(p, le, damage, DamageCause.CUSTOM);
 			}
 		}
 		if (confuse.size() > 0) {

@@ -65,7 +65,7 @@ public class Oceanus implements Deity {
 			//ult
 			int duration = (int)Math.round(40*Math.pow(devotion, 0.15)); //seconds
 			int t = (int)(ULTIMATECOOLDOWNMAX - ((ULTIMATECOOLDOWNMAX - ULTIMATECOOLDOWNMIN)*
-					((double)DUtil.getAscensions(p)/100)));
+					((double)DUtil.getAscensions(p)/DUtil.ASCENSIONCAP)));
 			/*
 			 * Print text
 			 */
@@ -150,7 +150,7 @@ public class Oceanus implements Deity {
 				}
 				if (DUtil.getFavor(p)>=ULTIMATECOST) {
 					int t = (int)(ULTIMATECOOLDOWNMAX - ((ULTIMATECOOLDOWNMAX - ULTIMATECOOLDOWNMIN)*
-							((double)DUtil.getAscensions(p)/100)));
+							((double)DUtil.getAscensions(p)/DUtil.ASCENSIONCAP)));
 					ULTIMATETIME = System.currentTimeMillis()+(t*1000);
 					p.getWorld().setStorm(true);
 					p.getWorld().setThundering(true);
@@ -178,10 +178,14 @@ public class Oceanus implements Deity {
 		}
 	}
 	private boolean squidfire(Player p) {
+		if (!DUtil.canPVP(p.getLocation())) {
+			p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+			return false;
+		}
 		Location target = DUtil.getTargetLocation(p);
 		if (target == null)
 			return false;
-		if (!DUtil.isPVP(target))
+		if (!DUtil.canPVP(target))
 			return false;
 		Squid squid = p.getWorld().spawn(p.getLocation(), Squid.class);
 		Vector v = p.getLocation().toVector();

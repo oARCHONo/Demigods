@@ -19,7 +19,7 @@ public class DamageHandler implements Listener {
 	 * 
 	 * The adjusted value should be around/less than 1 to adjust for the increased health, but not ridiculous
 	 */
-
+	public static boolean FRIENDLYFIRE = Settings.getSettingBoolean("friendly_fire");
 
 	@EventHandler (priority = EventPriority.HIGHEST)
 	public void onDamage(EntityDamageEvent e) {
@@ -32,11 +32,19 @@ public class DamageHandler implements Listener {
 			return;
 		if (e instanceof EntityDamageByEntityEvent) {
 			EntityDamageByEntityEvent ee = (EntityDamageByEntityEvent)e;
-			if (ee.getDamager() instanceof Player)
-				DUtil.damageDemigods((LivingEntity)ee.getDamager(), p, e.getDamage());
+			if (ee.getDamager() instanceof Player) {
+				if (!FRIENDLYFIRE) {
+					if (DUtil.areAllied(p, (Player)ee.getDamager())) {
+						e.setDamage(0);
+						return;
+					}
+				}
+				DUtil.damageDemigods((LivingEntity)ee.getDamager(), p, e.getDamage(), e.getCause());
+			}
 		}
-		if ((e.getCause() != DamageCause.ENTITY_ATTACK) && (e.getCause() != DamageCause.PROJECTILE))
+		if ((e.getCause() != DamageCause.ENTITY_ATTACK) && (e.getCause() != DamageCause.PROJECTILE)) {
 			DUtil.damageDemigodsNonCombat(p, e.getDamage());
+		}
 		DUtil.damageDemigods(p, e.getDamage());
 		if (DUtil.getHP(p) < 0) DUtil.setHP(p, 0);
 		e.setDamage(0);
@@ -61,7 +69,6 @@ public class DamageHandler implements Listener {
 		//	DUtil.setHP(p, newhp);
 		e.setCancelled(true);
 		DUtil.setHP(p, DUtil.getHP(p)+e.getAmount());
-		syncHealth(p);
 	}
 	public static void syncHealth(Player p) {
 		int current = DUtil.getHP(p);

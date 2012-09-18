@@ -29,12 +29,12 @@ public class PVPManager implements Listener {
 			return;
 		if (DUtil.getAllegiance(attacker).equalsIgnoreCase(DUtil.getAllegiance(target)))
 			return;
-		if (!DUtil.isPVP(target.getLocation())) {
+		if (!DUtil.canPVP(target.getLocation())) {
 			attacker.sendMessage(ChatColor.YELLOW+"This is a no-PvP zone.");
 			return;
 		}
 		Deity d = DUtil.getDeities(attacker).get((int)Math.floor(Math.random()*DUtil.getDeities(attacker).size()));
-		DUtil.setDevotion(attacker, d, DUtil.getDevotion(attacker, d)+e.getDamage()*2);
+		DUtil.setDevotion(attacker, d, DUtil.getDevotion(attacker, d)+(int)(e.getDamage()*MULTIPLIER));
 		LevelManager.levelProcedure(attacker);
 	}
 
@@ -66,8 +66,11 @@ public class PVPManager implements Listener {
 					DUtil.getPlugin().getServer().broadcastMessage(ChatColor.YELLOW+attacked.getName()+ChatColor.GRAY+" of the "+
 							DUtil.getAllegiance(attacked)+ " alliance was slain by "+ChatColor.YELLOW+attacker.getName()+
 							ChatColor.GRAY+" of the "+DUtil.getAllegiance(attacker)+" alliance.");
+					double adjusted = DUtil.getKills(attacked)*1.0/DUtil.getDeaths(attacked);
+					if (adjusted > 5) adjusted = 5;
+					if (adjusted < 0.2) adjusted = 0.2;
 					for (Deity d : DUtil.getDeities(attacker)) {
-						DUtil.setDevotion(attacker, d, DUtil.getDevotion(attacker, d)+pvpkillreward);
+						DUtil.setDevotion(attacker, d, DUtil.getDevotion(attacker, d)+(int)(pvpkillreward*MULTIPLIER*adjusted));
 					}
 				}
 			} else { //regular player

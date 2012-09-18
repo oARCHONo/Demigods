@@ -121,6 +121,10 @@ public class Prometheus implements Deity {
 				if (System.currentTimeMillis() < FIREBALLTIME)
 					return;
 				if (DUtil.getFavor(p) >= FIREBALLCOST) {
+					if (!DUtil.canPVP(p.getLocation())) {
+						p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+						return;
+					}
 					DUtil.setFavor(p, DUtil.getFavor(p)-FIREBALLCOST);
 					shootFireball(p.getEyeLocation(), DUtil.getTargetLocation(p), p);
 					FIREBALLTIME = System.currentTimeMillis()+(long)(FIREBALLDELAY*1000);
@@ -135,9 +139,13 @@ public class Prometheus implements Deity {
 					return;
 				}
 				if (DUtil.getFavor(p) >= BLAZECOST) {
+					if (!DUtil.canPVP(p.getLocation())) {
+						p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+						return;
+					}
 					int diameter = (int)Math.ceil(1.43*Math.pow(DUtil.getDevotion(p, getName()), 0.1527));
 					if (diameter > 12) diameter = 12;
-					if (DUtil.isPVP(DUtil.getTargetLocation(p))) {
+					if (DUtil.canPVP(DUtil.getTargetLocation(p))) {
 						blaze(DUtil.getTargetLocation(p), diameter);
 						DUtil.setFavor(p, DUtil.getFavor(p)-BLAZECOST);
 						BLAZETIME = System.currentTimeMillis()+(long)(BLAZEDELAY*1000);
@@ -231,6 +239,10 @@ public class Prometheus implements Deity {
 				return;
 			}
 			if (DUtil.getFavor(p)>=PROMETHEUSULTIMATECOST) {
+				if (!DUtil.canPVP(p.getLocation())) {
+					p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+					return;
+				}
 				int t = (int)(PROMETHEUSULTIMATECOOLDOWNMAX - ((PROMETHEUSULTIMATECOOLDOWNMAX - PROMETHEUSULTIMATECOOLDOWNMIN)*
 						((double)DUtil.getAscensions(p)/100)));
 				FIRESTORMTIME = System.currentTimeMillis()+(t*1000);
@@ -246,7 +258,7 @@ public class Prometheus implements Deity {
 
 	}
 	private void shootFireball(Location from, Location to, Player player){
-		if (!DUtil.isPVP(to) || !DUtil.isPVP(from))
+		if (!DUtil.canPVP(to) || !DUtil.canPVP(from))
 			return;
 		Location blockLoc = to;
 		blockLoc.setX(blockLoc.getX()+.5);
@@ -263,7 +275,7 @@ public class Prometheus implements Deity {
 			for (int y=-diameter/2; y<=diameter/2; y++) {
 				for (int z= -diameter/2; z<=diameter/2; z++) {
 					Block b = target.getWorld().getBlockAt(target.getBlockX()+x, target.getBlockY()+y, target.getBlockZ()+z);
-					if ((b.getType() == Material.AIR) || (((b.getType() == Material.SNOW)) && DUtil.isPVP(b.getLocation())))
+					if ((b.getType() == Material.AIR) || (((b.getType() == Material.SNOW)) && DUtil.canPVP(b.getLocation())))
 						b.setType(Material.FIRE);
 				}
 			}
@@ -276,9 +288,9 @@ public class Prometheus implements Deity {
 		for (LivingEntity anEntity : p.getWorld().getLivingEntities()){
 			if (anEntity instanceof Player)
 				if (DUtil.isFullParticipant((Player)anEntity))
-					if (DUtil.isTitan((Player)anEntity))
+					if (DUtil.areAllied(p, (Player)anEntity))
 						continue;
-			if (!DUtil.isPVP(anEntity.getLocation()))
+			if (!DUtil.canPVP(anEntity.getLocation()))
 				continue;
 			if (anEntity.getLocation().toVector().isInSphere(ploc, 50))
 				entitylist.add(anEntity);
@@ -290,9 +302,9 @@ public class Prometheus implements Deity {
 				@Override
 				public void run(){
 					for (LivingEntity e1 : enList) {
-						Location up = new Location(e1.getWorld(),e1.getLocation().getX()+Math.random(),256,e1.getLocation().getZ()+Math.random());
+						Location up = new Location(e1.getWorld(),e1.getLocation().getX()+Math.random()*5,256,e1.getLocation().getZ()+Math.random()*5);
 						up.setPitch(90);
-						shootFireball(up,new Location(e1.getWorld(),e1.getLocation().getX()+Math.random(),e1.getLocation().getY(),e1.getLocation().getZ()+Math.random()),pl);
+						shootFireball(up,new Location(e1.getWorld(),e1.getLocation().getX()+Math.random()*5,e1.getLocation().getY(),e1.getLocation().getZ()+Math.random()*5),pl);
 					}
 				}
 			},i);

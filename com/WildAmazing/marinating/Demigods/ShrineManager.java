@@ -143,7 +143,7 @@ public class ShrineManager implements Listener {
 			Iterator<Block> i = e.blockList().iterator();
 			while (i.hasNext()) {
 				Block b = i.next();
-				if (!DUtil.isPVP(b.getLocation()))
+				if (!DUtil.canPVP(b.getLocation()))
 					i.remove();
 				for (WriteLocation center : DUtil.getAllShrines())
 					if ((DUtil.toWriteLocation(b.getLocation())).equalsApprox(center))
@@ -173,6 +173,7 @@ public class ShrineManager implements Listener {
 				Inventory ii = DUtil.getPlugin().getServer().createInventory(p, 27, "Tributes");
 				p.openInventory(ii);
 				DSave.saveData(p, deityname.toUpperCase()+"_TRIBUTE_", DUtil.getOwnerOfShrine(DUtil.toWriteLocation(e.getClickedBlock().getLocation())));
+				e.setCancelled(true);
 				return;
 			}
 		p.sendMessage(ChatColor.YELLOW+"You must be allianced to "+deityname+" in order to tribute here.");

@@ -65,7 +65,9 @@ public class DSave {
 	 * Check if the player has saved information.
 	 */
 	public static boolean hasPlayer(Player p) {
-		return hasPlayer(p.getName());
+		if (p != null)
+			return hasPlayer(p.getName());
+		return false;
 	}
 	public static boolean hasPlayer(String p) {
 		return SAVEDDATA.containsKey(p);
@@ -148,6 +150,12 @@ public class DSave {
 	public static void removePlayer(String p) {
 		if (SAVEDDATA.containsKey(p)) {
 			SAVEDDATA.remove(p);
+		}
+		try {
+			File f = new File(PATH+"Players/"+p+".dem");
+			f.delete();
+		} catch (Exception er) {
+			Logger.getLogger("Minecraft").warning("[Demigods] Error while removing "+p+" from save.");
 		}
 	}
 	public static HashMap<String, HashMap<String, Object>> getCompleteData() {

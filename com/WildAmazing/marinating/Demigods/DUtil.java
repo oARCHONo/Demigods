@@ -6,16 +6,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import net.minecraft.server.DataWatcher;
+import net.minecraft.server.EntityLiving;
+import net.minecraft.server.Packet40EntityMetadata;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
+
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
 import com.massivecraft.factions.Board;
 import com.massivecraft.factions.FLocation;
@@ -29,6 +39,7 @@ public class DUtil {
 	public static int ASCENSIONCAP = Settings.getSettingInt("ascension_cap"); //max levels
 	private static int FAVORCAP = Settings.getSettingInt("globalfavorcap"); //max favor
 	private static boolean BROADCASTNEWDEITY = Settings.getSettingBoolean("broadcast_new_deities"); //tell server when a player gets a deity
+	private static boolean ALLOWPVPEVERYWHERE = Settings.getSettingBoolean("allow_skills_everywhere");
 
 	public DUtil(Demigods d) {
 		plugin = d;
@@ -139,7 +150,11 @@ public class DUtil {
 	public static ArrayList<Location> toLocations(List<WriteLocation> L){
 		ArrayList<Location> al = new ArrayList<Location>();
 		for (WriteLocation l : L){
-			al.add(new Location(plugin.getServer().getWorld(l.getWorld()),l.getX(),l.getY(),l.getZ()));
+			try {
+				al.add(new Location(plugin.getServer().getWorld(l.getWorld()),l.getX(),l.getY(),l.getZ()));
+			} catch (Exception er) {
+
+			}
 		}
 		return al;
 	}
@@ -149,7 +164,11 @@ public class DUtil {
 	 * @return
 	 */
 	public static Location toLocation(WriteLocation l){
-		return new Location(plugin.getServer().getWorld(l.getWorld()),l.getX(),l.getY(),l.getZ());
+		try {
+			return new Location(plugin.getServer().getWorld(l.getWorld()),l.getX(),l.getY(),l.getZ());
+		} catch (Exception er) {
+			return null;
+		}
 	}
 	/**
 	 * Checks if a player has the given permission or is OP.
@@ -204,44 +223,13 @@ public class DUtil {
 	public static void setAllegiance(String p, String allegiance) {
 		DSave.saveData(p, "ALLEGIANCE", allegiance);
 	}
-	/**
-	 * Checks if a player is a Titan.
-	 * @param p
-	 * @return
-	 */
-	public static boolean isTitan(Player p) {
-		if (DSave.hasData(p, "ALLEGIANCE"))
-			return getAllegiance(p).equalsIgnoreCase("titan");
-		return false;
+	public static boolean areAllied(Player p1, Player p2) {
+		return areAllied(p1.getName(), p2.getName());
 	}
-	/**
-	 * Checks if a player is a Titan.
-	 * @param p
-	 * @return
-	 */
-	public static boolean isTitan(String p) {
-		if (DSave.hasData(p, "ALLEGIANCE"))
-			return getAllegiance(p).equalsIgnoreCase("titan");
-		return false;
-	}
-	/**
-	 * Checks if a player is a God.
-	 * @param p
-	 * @return
-	 */
-	public static boolean isGod(String p) {
-		if (DSave.hasData(p, "ALLEGIANCE"))
-			return getAllegiance(p).equalsIgnoreCase("god");
-		return false;
-	}
-	/**
-	 * Checks if a player is a God.
-	 * @param p
-	 * @return
-	 */
-	public static boolean isGod(Player p) {
-		if (DSave.hasData(p, "ALLEGIANCE"))
-			return getAllegiance(p).equalsIgnoreCase("god");
+	public static boolean areAllied(String p1, String p2) {
+		if (isFullParticipant(p1) && isFullParticipant(p2)) {
+			return getAllegiance(p1).equalsIgnoreCase(getAllegiance(p2));
+		}
 		return false;
 	}
 	/**
@@ -409,6 +397,19 @@ public class DUtil {
 	public static void setFavor(String p, int amt) {
 		if (amt > getFavorCap(p))
 			amt = getFavorCap(p);
+		int c = amt-getFavor(p);
+		DSave.saveData(p, "FAVOR", new Integer(amt));
+		if ((c != 0) && (DUtil.getOnlinePlayer(p) != null)) {
+			String disp = "";
+			if (c > 0) disp = "+"+c;
+			else disp+=c;
+			String str =  ChatColor.GOLD+"Favor: "+ChatColor.WHITE+DUtil.getFavor(p)+"/"+DUtil.getFavorCap(p)+" ("+disp+")";
+			sendSimpleNoticeMessage(DUtil.getOnlinePlayer(p), str);
+		}
+	}
+	public static void setFavorQuiet(String p, int amt) {
+		if (amt > getFavorCap(p))
+			amt = getFavorCap(p);
 		DSave.saveData(p, "FAVOR", new Integer(amt));
 	}
 	/**
@@ -443,6 +444,22 @@ public class DUtil {
 	 * @param amt
 	 */
 	public static void setHP(String p, int amt) {
+		if (amt > getMaxHP(p))
+			amt = getMaxHP(p);
+		int c = amt-getHP(p);
+		DSave.saveData(p, "dHP", new Integer(amt));
+		if ((c != 0) && (DUtil.getOnlinePlayer(p) != null)) {
+			ChatColor color = ChatColor.GREEN;
+			if ((DUtil.getHP(p)/(double)DUtil.getMaxHP(p)) < 0.25) color = ChatColor.RED;
+			else if ((DUtil.getHP(p)/(double)DUtil.getMaxHP(p)) < 0.5) color = ChatColor.YELLOW;
+			String disp = "";
+			if (c > 0) disp = "+"+c;
+			else disp += c;
+			String str = color+"HP: "+DUtil.getHP(p)+"/"+DUtil.getMaxHP(p)+" ("+disp+")";
+			sendSimpleNoticeMessage(DUtil.getOnlinePlayer(p), str);
+		}
+	}
+	public static void setHPQuiet(String p, int amt) {
 		if (amt > getMaxHP(p))
 			amt = getMaxHP(p);
 		DSave.saveData(p, "dHP", new Integer(amt));
@@ -509,7 +526,15 @@ public class DUtil {
 	 */
 	public static boolean setDevotion(String p, String deityname, int amt) {
 		try {
+			int c = amt-getDevotion(p, deityname);
 			DSave.saveData(p, deityname+"_dvt", amt);
+			if ((c != 0) && (getOnlinePlayer(p) != null)) {
+				String disp = "";
+				if (c > 0) disp = "+"+c;
+				else disp += c;
+				sendSimpleNoticeMessage(getOnlinePlayer(p), ChatColor.DARK_PURPLE+getDeity(p, deityname).getName()+": "+
+						ChatColor.WHITE+disp);
+			}
 			return true;
 		} catch (NullPointerException ne) {
 			return false;
@@ -748,7 +773,7 @@ public class DUtil {
 	 * @return
 	 */
 	public static String getRank(Player p) {
-		if (isTitan(p)) {
+		if (getAllegiance(p).equalsIgnoreCase("titan")) {
 			switch (getDeities(p).size()) {
 			case 1: return "Fallen";
 			case 2: return "Condemned";
@@ -762,7 +787,7 @@ public class DUtil {
 			case 10: return "Immortal";
 			default: return "Primordial";
 			}
-		} else if (isGod(p)) {
+		} else if (getAllegiance(p).equalsIgnoreCase("god")) {
 			switch (getDeities(p).size()) {
 			case 1: return "Apprentice";
 			case 2: return "Acolyte";
@@ -1141,7 +1166,9 @@ public class DUtil {
 	 * @return the shrine that was removed
 	 */
 	public static void removeShrine(WriteLocation shrine) {
-		toLocation(shrine).getBlock().setType(Material.AIR);
+		try {
+			toLocation(shrine).getBlock().setType(Material.AIR);
+		} catch (NullPointerException invalid) {}
 		for (String p : getFullParticipants()) {
 			//remove from main lists
 			HashMap<String, WriteLocation> replace = new HashMap<String, WriteLocation>();
@@ -1330,32 +1357,99 @@ public class DUtil {
 		return names;
 	}
 	@SuppressWarnings("static-access")
-	public static boolean isWorldGuardPVP(Location l) {
+	public static boolean canWorldGuardPVP(Location l) {
+		if (ALLOWPVPEVERYWHERE)
+			return true;
 		if (plugin.WORLDGUARD == null)
-			return false;
+			return true;
 		ApplicableRegionSet set = plugin.WORLDGUARD.getRegionManager(l.getWorld()).getApplicableRegions(l);
 		return set.allows(DefaultFlag.PVP);
 	}
 	@SuppressWarnings("static-access")
-	public static boolean isFactionsPVP(Location l) {
+	public static boolean canFactionsPVP(Location l) {
+		if (ALLOWPVPEVERYWHERE)
+			return true;
 		if (plugin.FACTIONS == null)
-			return false;
+			return true;
 		Faction faction = Board.getFactionAt(new FLocation(l.getBlock()));
-		return (!(faction.isPeaceful() || faction.isSafeZone()));
+		return !(faction.isPeaceful() || faction.isSafeZone());
 	}
-	public static boolean isPVP(Location l) {
-		return isWorldGuardPVP(l)&&isFactionsPVP(l);
+	public static boolean canPVP(Location l) {
+		if (ALLOWPVPEVERYWHERE)
+			return true;
+		return (canWorldGuardPVP(l)&&canFactionsPVP(l));
+	}
+	/**
+	 * For fancy effects
+	 */
+	/**
+	 * Player: Player who sees it
+	 * Entity: Entity the swirls appear on
+	 * Color: In hex, eg 0x000FF
+	 * Duration in ticks
+	 * Originally by nisovin
+	 */
+	public static void playEffect(final Player player, final LivingEntity entity, int color, int duration) {
+		final DataWatcher dw = new DataWatcher();
+		dw.a(8, Integer.valueOf(0));
+		dw.watch(8, Integer.valueOf(color));
+
+		Packet40EntityMetadata packet = new Packet40EntityMetadata(entity.getEntityId(), dw);
+		((CraftPlayer)player).getHandle().netServerHandler.sendPacket(packet);
+
+		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+			@Override
+			public void run() {
+				DataWatcher dwReal = ((CraftLivingEntity)entity).getHandle().getDataWatcher();
+				dw.watch(8, dwReal.getInt(8));
+				Packet40EntityMetadata packet = new Packet40EntityMetadata(entity.getEntityId(), dw);
+				((CraftPlayer)player).getHandle().netServerHandler.sendPacket(packet);
+			}
+		}, duration);
+	}
+	/**
+	 * Entity: Entity to have the effect
+	 * Color: In hex, eg 0x000FF
+	 * Duration in ticks
+	 * @param entity
+	 * @param color
+	 * @param duration
+	 * Originally by nisovin
+	 */
+	public static void playEffect(LivingEntity entity, int color, int duration) {
+		final EntityLiving el = ((CraftLivingEntity)entity).getHandle();
+		final DataWatcher dw = el.getDataWatcher();
+		dw.watch(8, Integer.valueOf(color));
+
+		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+			@Override
+			public void run() {
+				int c = 0;
+				if (!el.effects.isEmpty()) {
+					c = net.minecraft.server.PotionBrewer.a(el.effects.values());
+				}
+				dw.watch(8, Integer.valueOf(c));
+			}
+		}, duration);
+	}
+	/**
+	 * For SimpleNotice
+	 */
+	public static void sendSimpleNoticeMessage(Player p, String text) {
+		if (p.getListeningPluginChannels().contains("SimpleNotice")) {
+			p.sendPluginMessage(getPlugin(), "SimpleNotice", text.getBytes(java.nio.charset.Charset.forName("UTF-8")));
+		}
 	}
 	/**
 	 * Demigods damage handling
 	 */
-	public static void damageDemigods(LivingEntity source, LivingEntity target, int amount) {
+	public static void damageDemigods(LivingEntity source, LivingEntity target, int amount, DamageCause cause) {
 		if (target.getHealth() > 1)
 			target.damage(1);
 		if (target instanceof Player) {
 			if (((Player)target).getGameMode() == GameMode.CREATIVE)
 				return;
-			if (!isPVP(target.getLocation()))
+			if (!canPVP(target.getLocation()))
 				return;
 			int hp = getHP((Player)target);
 			if (amount < 1) return;
@@ -1363,6 +1457,9 @@ public class DUtil {
 			amount = DamageHandler.specialReduction((Player)target, amount);
 			if (amount < 1) return;
 			setHP(((Player)target), hp-amount);
+			if (source instanceof Player) {
+				target.setLastDamageCause(new EntityDamageByEntityEvent(source, target, cause, amount));
+			}
 			DamageHandler.syncHealth(((Player)target));
 		} else target.damage(amount);
 	}
@@ -1377,12 +1474,11 @@ public class DUtil {
 		setHP((target), hp-amount);
 		if (target.getHealth() > 1)
 			target.damage(1);
-		DamageHandler.syncHealth((target));
 	}
 	public static void damageDemigods(Player target, int amount) {
 		if ((target).getGameMode() == GameMode.CREATIVE)
 			return;
-		if (!isPVP(target.getLocation()))
+		if (!canPVP(target.getLocation()))
 			return;
 		int hp = getHP(target);
 		if (amount < 1) return;
@@ -1392,6 +1488,5 @@ public class DUtil {
 		setHP((target), hp-amount);
 		if (target.getHealth() > 1)
 			target.damage(1);
-		DamageHandler.syncHealth((target));
 	}
 }

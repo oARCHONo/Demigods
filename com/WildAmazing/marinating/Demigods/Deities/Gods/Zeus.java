@@ -235,6 +235,10 @@ public class Zeus implements Deity {
 				return;
 			}
 			if (DUtil.getFavor(p)>=ZEUSULTIMATECOST) {
+				if (!DUtil.canPVP(p.getLocation())) {
+					p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+					return;
+				}
 				int t = (int)(ZEUSULTIMATECOOLDOWNMAX - ((ZEUSULTIMATECOOLDOWNMAX - ZEUSULTIMATECOOLDOWNMIN)*
 						((double)DUtil.getAscensions(p)/100)));
 				int num = storm(p);
@@ -254,6 +258,10 @@ public class Zeus implements Deity {
 	 * ---------------
 	 */
 	private void shove(Player p) {
+		if (!DUtil.canPVP(p.getLocation())) {
+			p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+			return;
+		}
 		ArrayList<LivingEntity> hit = new ArrayList<LivingEntity>();
 		int devotion = DUtil.getDevotion(p, getName());
 		int targets = (int)Math.ceil(1.561*Math.pow(devotion, 0.128424));
@@ -263,11 +271,11 @@ public class Zeus implements Deity {
 				if (targets == hit.size())
 					break;
 				if (le instanceof Player) {
-					if (DUtil.isGod((Player)le))
+					if (DUtil.areAllied(p, (Player)le))
 						continue;
 				}
 				if ((le.getLocation().distance(b.getLocation()) <= 5) && !hit.contains(le))
-					if (DUtil.isPVP(le.getLocation()))
+					if (DUtil.canPVP(le.getLocation()))
 						hit.add(le);
 			}
 		}
@@ -281,6 +289,10 @@ public class Zeus implements Deity {
 		}
 	}
 	private void lightning(Player p) {
+		if (!DUtil.canPVP(p.getLocation())) {
+			p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+			return;
+		}
 		Location target = null;
 		Block b = p.getTargetBlock(null, 200);
 		target = b.getLocation();
@@ -304,7 +316,7 @@ public class Zeus implements Deity {
 				LivingEntity e1 = (LivingEntity)eee;
 				if (e1 instanceof Player){
 					Player ptemp = (Player)e1;
-					if (!DUtil.isGod(ptemp)&&!ptemp.equals(p)){
+					if (!DUtil.areAllied(p, ptemp)&&!ptemp.equals(p)){
 						strikeLightning(p, ptemp.getLocation());
 						strikeLightning(p, ptemp.getLocation());
 						strikeLightning(p, ptemp.getLocation());
@@ -324,14 +336,14 @@ public class Zeus implements Deity {
 	private void strikeLightning(Player p, Location target) {
 		if (!p.getWorld().equals(target.getWorld()))
 			return;
-		if (!DUtil.isPVP(target))
+		if (!DUtil.canPVP(target))
 			return;
 		p.getWorld().strikeLightning(target);
 		for (Entity e : target.getBlock().getChunk().getEntities()) {
 			if (e instanceof LivingEntity) {
 				LivingEntity le = (LivingEntity)e;
 				if (le.getLocation().distance(target) < 1.5)
-					DUtil.damageDemigods(p, le, DUtil.getAscensions(p)*2);
+					DUtil.damageDemigods(p, le, DUtil.getAscensions(p)*2, DamageCause.CUSTOM);
 			}
 		}
 	}

@@ -14,12 +14,15 @@ import com.WildAmazing.marinating.Demigods.Deities.Deity;
 public class LevelManager implements Listener {
 
 	static double MULTIPLIER = Settings.getSettingDouble("globalexpmultiplier"); //can be modified
+	static int LOSSLIMIT = 15000; //max devotion lost on death per deity
 
 	@EventHandler (priority = EventPriority.HIGHEST)
 	public void gainEXP(BlockBreakEvent e) {
 		if (e.getPlayer() != null) {
 			Player p = e.getPlayer();
 			if (!DUtil.isFullParticipant(p))
+				return;
+			if (!Settings.getEnabledWorlds().contains(p.getWorld()))
 				return;
 			int value = 0;
 			switch (e.getBlock().getType()) {
@@ -62,7 +65,7 @@ public class LevelManager implements Listener {
 				return;
 			if (!Settings.getEnabledWorlds().contains(p.getWorld()))
 				return;
-			if (!DUtil.isPVP(e.getEntity().getLocation())) {
+			if (!DUtil.canPVP(e.getEntity().getLocation())) {
 				return;
 			}
 			/*
@@ -84,10 +87,13 @@ public class LevelManager implements Listener {
 			return;
 		if (!Settings.getEnabledWorlds().contains(p.getWorld()))
 			return;
-		double reduced = 0.8; //TODO
+		double reduced = 0.1; //TODO
 		long before = DUtil.getDevotion(p);
 		for (Deity d : DUtil.getDeities(p)) {
-			DUtil.setDevotion(p, d, (int)Math.round(DUtil.getDevotion(p, d)*reduced));
+			int reduceamt = (int)Math.round(DUtil.getDevotion(p, d)*reduced*MULTIPLIER);
+			if (reduceamt > LOSSLIMIT)
+				reduceamt = LOSSLIMIT;
+			DUtil.setDevotion(p, d, DUtil.getDevotion(p, d)-reduceamt);
 		}
 		if (DUtil.getDeities(p).size() < 2)
 			p.sendMessage(ChatColor.DARK_RED+"You have failed in your service to "+DUtil.getDeities(p).get(0).getName()+".");

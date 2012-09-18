@@ -19,7 +19,7 @@ public class Hephaestus implements Deity, Listener {
 	private static final long serialVersionUID = -2472769863144336856L;
 	private String PLAYER;
 
-	private static final int SKILLCOST = 300;
+	private static final int SKILLCOST = 200;
 	private static final int ULTIMATECOST = 9000;
 	private static final int ULTIMATECOOLDOWNMAX = 1800; //seconds
 	private static final int ULTIMATECOOLDOWNMIN = 900;
@@ -58,7 +58,7 @@ public class Hephaestus implements Deity, Listener {
 			int ultrange = (int)Math.ceil(15*Math.pow(devotion, 0.09));
 			int ultdamage = (int)Math.ceil(200*Math.pow(devotion, 0.17));
 			int t = (int)(ULTIMATECOOLDOWNMAX - ((ULTIMATECOOLDOWNMAX - ULTIMATECOOLDOWNMIN)*
-					((double)DUtil.getAscensions(p)/100)));
+					((double)DUtil.getAscensions(p)/DUtil.ASCENSIONCAP)));
 			//
 			p.sendMessage("--"+ChatColor.GOLD+getName()+ChatColor.GRAY+"["+devotion+"]");
 			p.sendMessage(":Furnaces up to "+passiverange+" blocks away produce double yields.");
@@ -139,8 +139,12 @@ public class Hephaestus implements Deity, Listener {
 					return;
 				}
 				if (DUtil.getFavor(p)>=ULTIMATECOST) {
+					if (!DUtil.canPVP(p.getLocation())) {
+						p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+						return;
+					}
 					int t = (int)(ULTIMATECOOLDOWNMAX - ((ULTIMATECOOLDOWNMAX - ULTIMATECOOLDOWNMIN)*
-							((double)DUtil.getAscensions(p)/100)));
+							((double)DUtil.getAscensions(p)/DUtil.ASCENSIONCAP)));
 					ULTIMATETIME = System.currentTimeMillis()+(t*1000);
 					int num = shatter(p);
 					if (num > 0) {
@@ -184,7 +188,7 @@ public class Hephaestus implements Deity, Listener {
 		int i=0;
 		for (Player pl : p.getWorld().getPlayers()) {
 			if (pl.getLocation().distance(p.getLocation()) <= ultrange) {
-				if (!DUtil.isPVP(pl.getLocation()))
+				if (!DUtil.canPVP(pl.getLocation()))
 					continue;
 				if (DUtil.isFullParticipant(pl)) {
 					if (DUtil.getAllegiance(pl).equalsIgnoreCase(getDefaultAlliance())) {

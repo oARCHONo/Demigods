@@ -1,6 +1,6 @@
 name: Demigods
 main: com.WildAmazing.marinating.Demigods.Demigods
-version: 2.0f
+version: 2.2
 description: Ally yourself with mythical deities and battle in the name of the Gods or Titans.
 author: marinating
 softdepend: [WorldGuard, WorldEdit, Factions]
@@ -130,6 +130,10 @@ commands:
         usage: /removeshrine
         description: Removes a shrine from the save.
         permission: demigods.removeshrine
+    listshrines:
+        usage: /listshrines
+        description: Lists every shrine on the server.
+        permission: demigods.listshrines
     fixshrine:
         usage: /fixshrine
         description: Fixes a shrine if the block is missing.
@@ -204,3 +208,13 @@ commands:
         description: One of Hephaestus's abilities.
     shatter:
         description: Hephaestus's ultimate.
+    cure:
+        description: One of Apollo's abilities.
+    finale:
+        description: Apollo's ultimate.
+    swap:
+        description: One of Themis' abilities.
+    congregate:
+        description: Themis' ultimate.
+    assemble:
+        description: Used with Themis' ultimate.

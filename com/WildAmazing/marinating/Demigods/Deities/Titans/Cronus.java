@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -25,10 +26,10 @@ public class Cronus implements Deity {
 
 	//global vars
 	private static final int CLEAVECOST = 100;
-	private static final int SLOWCOST = 350;
-	private static final int CRONUSULTIMATECOST = 7000;
-	private static final int CRONUSULTIMATECOOLDOWNMAX = 360;
-	private static final int CRONUSULTIMATECOOLDOWNMIN = 80;
+	private static final int SLOWCOST = 180;
+	private static final int CRONUSULTIMATECOST = 5000;
+	private static final int CRONUSULTIMATECOOLDOWNMAX = 500;
+	private static final int CRONUSULTIMATECOOLDOWNMIN = 120;
 
 	//per player
 	String PLAYER;
@@ -138,12 +139,12 @@ public class Cronus implements Deity {
 									return;
 								if (System.currentTimeMillis() < CLEAVETIME+100)
 									return;
-								if (!DUtil.isPVP(e.getEntity().getLocation()))
+								if (!DUtil.canPVP(e.getEntity().getLocation()))
 									return;
 								DUtil.setFavor(p, DUtil.getFavor(p) - CLEAVECOST);
 								for (int i=1;i<=31;i+=4)
 									e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.SMOKE, i);
-								DUtil.damageDemigods(p, (LivingEntity)e.getEntity(), (int)Math.ceil(Math.pow(DUtil.getDevotion(p, getName()), 0.35)));
+								DUtil.damageDemigods(p, (LivingEntity)e.getEntity(), (int)Math.ceil(Math.pow(DUtil.getDevotion(p, getName()), 0.35)), DamageCause.ENTITY_ATTACK);
 								CLEAVETIME = System.currentTimeMillis();
 								if ((LivingEntity)e.getEntity() instanceof Player) {
 									Player otherP = (Player)((LivingEntity)e.getEntity());
@@ -244,6 +245,10 @@ public class Cronus implements Deity {
 				return;
 			}
 			if (DUtil.getFavor(p)>=CRONUSULTIMATECOST) {
+				if (!DUtil.canPVP(p.getLocation())) {
+					p.sendMessage(ChatColor.YELLOW+"You can't do that from a no-PVP zone.");
+					return;
+				}
 				int t = (int)(CRONUSULTIMATECOOLDOWNMAX - ((CRONUSULTIMATECOOLDOWNMAX - CRONUSULTIMATECOOLDOWNMIN)*
 						((double)DUtil.getAscensions(p)/100)));
 				CRONUSULTIMATETIME = System.currentTimeMillis()+(t*1000);
@@ -265,7 +270,7 @@ public class Cronus implements Deity {
 		Block b = p.getTargetBlock(null, 200);
 		for (Player pl : b.getWorld().getPlayers()) {
 			if (pl.getLocation().distance(b.getLocation()) < 4) {
-				if (!DUtil.isTitan(pl) && DUtil.isPVP(pl.getLocation())){
+				if (!DUtil.areAllied(pl, p) && DUtil.canPVP(pl.getLocation())){
 					target = pl;
 					break;
 				}
@@ -287,16 +292,18 @@ public class Cronus implements Deity {
 		int duration = (int)Math.round(9.9155621 * Math.pow(DUtil.getAscensions(p), 0.459019));
 		int count = 0;
 		for (Player pl : p.getWorld().getPlayers()) {
+			if (pl.getLocation().toVector().isInSphere(p.getLocation().toVector(), 70));
 			if (DUtil.isFullParticipant(pl)) {
 				if (DUtil.getAllegiance(pl).equalsIgnoreCase(DUtil.getAllegiance(p)))
 					continue;
-				if (!DUtil.isPVP(pl.getLocation()))
+				if (!DUtil.canPVP(pl.getLocation()))
 					continue;
 			}
 			pl.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, duration*20, slowamount));
+			p.sendMessage(ChatColor.DARK_RED+"Cronus has slowed time around you.");
 			DUtil.addActiveEffect(pl.getName(), "Time Stop", duration);
 			count++;
 		}
-		p.sendMessage(ChatColor.RED+"Cronus has slowed time for "+count+" players in your world.");
+		p.sendMessage(ChatColor.RED+"Cronus has slowed time for "+count+" players nearby.");
 	}
 }
