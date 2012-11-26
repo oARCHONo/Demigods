@@ -19,7 +19,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
-import com.legit2.hqm.ClashniaUpdate.Update;
+import com.clashnia.ClashniaUpdate.Update;
 
 public class DeityManager implements Listener {
 	/*

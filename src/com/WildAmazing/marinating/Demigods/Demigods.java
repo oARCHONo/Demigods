@@ -29,6 +29,7 @@ import com.WildAmazing.marinating.Demigods.Deities.Gods.Hades;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Hephaestus;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Poseidon;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Zeus;
+
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Atlas;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Cronus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Hyperion;
@@ -36,8 +37,12 @@ import com.WildAmazing.marinating.Demigods.Deities.Titans.Oceanus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Prometheus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Themis;
+
+import com.clashnia.ClashniaUpdate.Update;
+import com.clashnia.Demigods.Deities.Giants.Typhon;
+
 import com.WildAmazing.marinating.Demigods.MetricsLite;
-import com.legit2.hqm.ClashniaUpdate.Update;
+
 import com.massivecraft.factions.P;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
@@ -70,7 +75,9 @@ public class Demigods extends JavaPlugin implements Listener {
 		new Poseidon("ADMIN"),
 		new Athena("ADMIN"),
 		new Hephaestus("ADMIN"),
-		new Apollo("ADMIN")
+		new Apollo("ADMIN"),
+		//
+		new Typhon()
 	};
 
 	public Demigods(){
