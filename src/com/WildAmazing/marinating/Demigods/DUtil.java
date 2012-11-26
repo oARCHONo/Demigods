@@ -25,6 +25,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
 import com.massivecraft.factions.Board;
@@ -1489,4 +1490,13 @@ public class DUtil {
 		if (target.getHealth() > 1)
 			target.damage(1);
 	}
+	
+	public static Plugin getPlugin(String p) {
+        for (Plugin pl : plugin.getServer().getPluginManager().getPlugins()) {
+            if (pl.getDescription().getName().equalsIgnoreCase(p)) {
+                return pl;
+            }
+        }
+        return null;
+    }
 }

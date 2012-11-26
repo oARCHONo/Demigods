@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -35,6 +36,8 @@ import com.WildAmazing.marinating.Demigods.Deities.Titans.Oceanus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Prometheus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Themis;
+import com.WildAmazing.marinating.Demigods.MetricsLite;
+import com.legit2.hqm.ClashniaUpdate.Update;
 import com.massivecraft.factions.P;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
@@ -77,6 +80,7 @@ public class Demigods extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		long firstTime = System.currentTimeMillis();
+		oldDownloader(); // #0 (disable old update method)
 		log.info("[Demigods] Initializing.");
 		new Settings(this); // #1 (needed for DUtil to load)
 		log.info("[Demigods] Updating configuration.");
@@ -86,8 +90,10 @@ public class Demigods extends JavaPlugin implements Listener {
 		loadCommands(); // #5 (needed)
 		initializeThreads(); // #6 (regen and etc)
 		loadDependencies(); // #7 compatibility with protection plugins
-		updateSave(); // #8 (updates from older versions)
+		loadMetrics(); // #8
+		updateSave(); // #9 (updates from older versions)
 		log.info("[Demigods] Preparation completed in "+((double)(System.currentTimeMillis()-firstTime)/1000)+" seconds.");
+		if (Settings.getSettingBoolean("auto-update")) Update.DemigodsUpdate();
 	}
 
 	@Override
@@ -140,6 +146,15 @@ public class Demigods extends JavaPlugin implements Listener {
 				log.info("[Demigods] Factions detected. Skills are disabled in peaceful zones.");
 		}
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "SimpleNotice");
+	}
+	
+	public void loadMetrics() {
+		try {
+			MetricsLite metrics = new MetricsLite(this);
+			metrics.start();
+		} catch (IOException e) {
+			// Failed to submit the stats :-(
+		}
 	}
 
 	public void loadCommands() {
@@ -350,6 +365,21 @@ public class Demigods extends JavaPlugin implements Listener {
 		}
 	}
 
+	private void oldDownloader() {
+		boolean downloaderExists = true;
+	    try {
+	      @SuppressWarnings("unused")
+		String downloaderVersion = getServer().getPluginManager().getPlugin("DemigodsDownloader").getDescription().getVersion();
+	    } catch (Exception nullpointer) {
+	      downloaderExists = false;
+	    }
+	    if (downloaderExists) {
+	    	Plugin DemigodsDownloader = DUtil.getPlugin("DemigodsDownloader");
+	    	Bukkit.getServer().getPluginManager().disablePlugin(DemigodsDownloader);
+	    	log.warning("[DemigodsDownloader] Please remove me, I am obsolete now!");
+	    }
+	}
+	
 	private void updateSave() {
 		//clean things that may cause glitches
 		for (String player : DUtil.getFullParticipants()) {

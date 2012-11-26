@@ -4,6 +4,7 @@ version: 2.3
 description: Ally yourself with mythical deities and battle in the name of the Gods or Titans.
 author: marinating
 softdepend: [WorldGuard, WorldEdit, Factions]
+loadbefore: [DemigodsDownloader]
 commands:
     dg:
         description: Important information.

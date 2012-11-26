@@ -19,6 +19,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
+import com.legit2.hqm.ClashniaUpdate.Update;
 
 public class DeityManager implements Listener {
 	/*
@@ -110,6 +111,10 @@ public class DeityManager implements Listener {
 		if (Settings.getSettingBoolean("motd")) {
 			p.sendMessage("This server is running Demigods v"+ChatColor.YELLOW+DUtil.getPlugin().getDescription().getVersion()+ChatColor.WHITE+".");
 			p.sendMessage(ChatColor.GRAY+"Type "+ChatColor.GREEN+"/dg"+ChatColor.GRAY+" for more info.");
+			if (Settings.getSettingBoolean("auto-update") == false && (Settings.getSettingBoolean("update-notify")) && (Update.shouldUpdate()) && DUtil.hasPermissionOrOP(p, "demigods.admin")) {
+				p.sendMessage(ChatColor.RED + "There is a new, stable release for Infractions.");
+				p.sendMessage(ChatColor.RED + "Please update ASAP.");
+			}
 		}
 		if (!DSave.hasPlayer(p)) {
 			Logger.getLogger("Minecraft").info("[Demigods] "+p.getName()+" joined and no save was detected. Creating new file.");
