@@ -25,6 +25,8 @@ public class Update {
 		PluginDescriptionFile pdf = DUtil.getPlugin().getDescription();
 		String latestVersion = pdf.getVersion();
 		String onlineVersion;
+		
+		if (latestVersion.contains("d")) return false; // development versions shouldn't downgrade
 
 		try {
 			URL version = new URL("http://www.clashnia.com/plugins/demigods/version.txt");
