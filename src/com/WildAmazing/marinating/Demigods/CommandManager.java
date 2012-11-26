@@ -1306,6 +1306,9 @@ public class CommandManager implements CommandExecutor, Listener {
 				if (amount > DUtil.getUnclaimedDevotion(p)) {
 					p.sendMessage(ChatColor.YELLOW+"You do not enough unclaimed Devotion.");
 					return true;
+				} else if (amount < 1) {
+					p.sendMessage(ChatColor.YELLOW+"Why would you want to do that?");
+					return true;
 				}
 				Deity d = DUtil.getDeity(p, deity);
 				DUtil.setUnclaimedDevotion(p, DUtil.getUnclaimedDevotion(p)-amount);

@@ -257,14 +257,9 @@ public class Prometheus implements Deity {
 	private void shootFireball(Location from, Location to, Player player){
 		if (!DUtil.canPVP(to) || !DUtil.canPVP(from))
 			return;
-		Location blockLoc = to;
-		blockLoc.setX(blockLoc.getX()+.5);
-		blockLoc.setY(blockLoc.getY()+.5);
-		blockLoc.setZ(blockLoc.getZ()+.5);
-		//Vector path = blockLoc.toVector().subtract(from.toVector());
-		LivingEntity fireball = player;
-		//Vector v = from.toVector().add(from.getDirection().multiply(2));
-		fireball.launchProjectile(Fireball.class);
+		Fireball fireball = player.launchProjectile(Fireball.class);
+		Vector velo = fireball.getVelocity().multiply(10);
+		fireball.setVelocity(velo);
 	}
 	private void blaze(Location target, int diameter) {
 		for (int x=-diameter/2; x<= diameter/2; x++) {
