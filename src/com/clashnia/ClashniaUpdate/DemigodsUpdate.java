@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
@@ -41,6 +42,7 @@ public class DemigodsUpdate {
 				return false;
 			} else {
 				log.info("[Demigods] Demigods is not up to date...");
+				log.info("[Demigods] Current version: " + latestVersion);
 				log.info("[Demigods] New version: " + onlineVersion);
 				in.close();
 				return true;
@@ -65,8 +67,14 @@ public class DemigodsUpdate {
 				FileOutputStream fos = new FileOutputStream("plugins"
 						+ File.separator + "Demigods.jar");
 				fos.getChannel().transferFrom(rbc, 0L, 16777216L);
-				log.info("[Demigods] Download complete!");
-				Bukkit.getServer().reload();
+				
+				while (((SeekableByteChannel) fos).size() == ((SeekableByteChannel) fos).position()) {
+					log.info("[Demigods] Download complete!");
+					fos.close();
+					Bukkit.getServer().getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("Demigods"));
+					Bukkit.getServer().getPluginManager().enablePlugin(Bukkit.getPluginManager().getPlugin("Demigods"));
+				}
+				log.info("[Demigods] Please reload the server!");
 			} catch (MalformedURLException ex) {
 				log.warning("[Demigods] Error accessing URL: " + ex);
 			} catch (FileNotFoundException ex) {
