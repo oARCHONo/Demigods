@@ -100,7 +100,7 @@ public class Demigods extends JavaPlugin implements Listener {
 		loadMetrics(); // #8
 		updateSave(); // #9 (updates from older versions)
 		log.info("[Demigods] Preparation completed in "+((double)(System.currentTimeMillis()-firstTime)/1000)+" seconds.");
-		if (Settings.getSettingBoolean("auto-update")) Update.DemigodsUpdate();
+		if (Settings.getSettingBoolean("auto-update") && (Update.shouldUpdate())) Update.DemigodsUpdate();
 	}
 
 	@Override
