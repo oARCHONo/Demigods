@@ -99,10 +99,8 @@ public class Demigods extends JavaPlugin implements Listener {
 		loadDependencies(); // #7 compatibility with protection plugins
 		loadMetrics(); // #8
 		updateSave(); // #9 (updates from older versions)
-		@SuppressWarnings("unused")
-		Boolean shouldUpdate = DemigodsUpdate.shouldUpdate();
+		DemigodsUpdate.shouldUpdate();
 		log.info("[Demigods] Preparation completed in "+((double)(System.currentTimeMillis()-firstTime)/1000)+" seconds.");
-		if (Settings.getSettingBoolean("auto-update") && (shouldUpdate = true)) DemigodsUpdate.demigodsUpdate();
 	}
 
 	@Override
