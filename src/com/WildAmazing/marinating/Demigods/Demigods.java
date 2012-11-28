@@ -38,7 +38,7 @@ import com.WildAmazing.marinating.Demigods.Deities.Titans.Prometheus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Themis;
 
-import com.clashnia.ClashniaUpdate.Update;
+import com.clashnia.ClashniaUpdate.DemigodsUpdate;
 import com.clashnia.Demigods.Deities.Giants.Typhon;
 
 import com.WildAmazing.marinating.Demigods.MetricsLite;
@@ -99,8 +99,10 @@ public class Demigods extends JavaPlugin implements Listener {
 		loadDependencies(); // #7 compatibility with protection plugins
 		loadMetrics(); // #8
 		updateSave(); // #9 (updates from older versions)
+		@SuppressWarnings("unused")
+		Boolean shouldUpdate = DemigodsUpdate.shouldUpdate();
 		log.info("[Demigods] Preparation completed in "+((double)(System.currentTimeMillis()-firstTime)/1000)+" seconds.");
-		if (Settings.getSettingBoolean("auto-update") && (Update.shouldUpdate())) Update.DemigodsUpdate();
+		if (Settings.getSettingBoolean("auto-update") && (shouldUpdate = true)) DemigodsUpdate.demigodsUpdate();
 	}
 
 	@Override

@@ -18,7 +18,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 
 import com.WildAmazing.marinating.Demigods.DUtil;
 
-public class Update {
+public class DemigodsUpdate {
 	static Logger log = Logger.getLogger("Minecraft");
 	
 	public static boolean shouldUpdate() {
@@ -53,8 +53,8 @@ public class Update {
 		return false;
 	}
 
-	public static void DemigodsUpdate() {
-		if ((shouldUpdate()))
+	public static void demigodsUpdate() {
+		if (shouldUpdate()) {
 			try {
 				log.info("[Demigods] Attempting to update to latest version...");
 				URL plugin = new URL(
@@ -74,5 +74,8 @@ public class Update {
 			} catch (IOException ex) {
 				log.warning("[Demigods] Error downloading file: " + ex);
 			}
+		} else {
+			// do nothing
+		}
 	}
 }
