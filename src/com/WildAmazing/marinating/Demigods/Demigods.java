@@ -376,14 +376,14 @@ public class Demigods extends JavaPlugin implements Listener {
 		boolean downloaderExists = true;
 	    try {
 	      @SuppressWarnings("unused")
-		String downloaderVersion = getServer().getPluginManager().getPlugin("DemigodsDownloader").getDescription().getVersion();
-	    } catch (Exception nullpointer) {
+		String downloaderVersion = getServer().getPluginManager().getPlugin("DemigodDownloader").getDescription().getVersion();
+	    } catch (NullPointerException e) {
 	      downloaderExists = false;
+	      e.printStackTrace();
 	    }
 	    if (downloaderExists) {
-	    	Plugin DemigodsDownloader = DUtil.getPlugin("DemigodsDownloader");
-	    	Bukkit.getServer().getPluginManager().disablePlugin(DemigodsDownloader);
-	    	log.warning("[DemigodsDownloader] Please remove me, I am obsolete now!");
+	    	Bukkit.getServer().getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("DemigodDownloader"));
+	    	log.warning("[DemigodDownloader] Please remove me, I am obsolete now!");
 	    }
 	}
 	
