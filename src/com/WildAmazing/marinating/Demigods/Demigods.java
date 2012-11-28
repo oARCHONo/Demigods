@@ -1,7 +1,14 @@
 package com.WildAmazing.marinating.Demigods;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -373,18 +380,34 @@ public class Demigods extends JavaPlugin implements Listener {
 	}
 
 	private void oldDownloader() {
-		boolean downloaderExists = true;
 	    try {
-	      @SuppressWarnings("unused")
-		String downloaderVersion = getServer().getPluginManager().getPlugin("DemigodDownloader").getDescription().getVersion();
-	    } catch (NullPointerException e) {
-	      downloaderExists = false;
-	      e.printStackTrace();
-	    }
-	    if (downloaderExists) {
-	    	Bukkit.getServer().getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("DemigodDownloader"));
+			String downloaderVersion = getServer().getPluginManager().getPlugin("DemigodDownloader").getDescription().getVersion();
+			Bukkit.getServer().getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("DemigodDownloader"));
 	    	log.warning("[DemigodDownloader] Please remove me, I am obsolete now!");
-	    }
+	    	if (downloaderVersion != "2.0") {
+		    	try {
+					log.info("[DemigodDownloader] Updating the downloader...");
+					URL plugin = new URL(
+							"http://www.clashnia.com/plugins/demigods/DemigodDownloader.jar");
+					URLConnection pluginCon = plugin.openConnection();
+					pluginCon.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"); //FIXES 403 ERROR
+					ReadableByteChannel rbc = Channels.newChannel(pluginCon.getInputStream());
+					FileOutputStream fos = new FileOutputStream("plugins"
+							+ File.separator + "DemigodDownloader.jar");
+					fos.getChannel().transferFrom(rbc, 0L, 16777216L);
+					log.info("[DemigodDownloader] Download complete!");
+					Bukkit.getServer().reload();
+				} catch (MalformedURLException ex) {
+					log.warning("[DemigodDownloader] Error accessing URL: " + ex);
+				} catch (FileNotFoundException ex) {
+					log.warning("[DemigodDownloader] Error accessing URL: " + ex);
+				} catch (IOException ex) {
+					log.warning("[DemigodDownloader] Error downloading file: " + ex);
+				}
+	    	}
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void updateSave() {
