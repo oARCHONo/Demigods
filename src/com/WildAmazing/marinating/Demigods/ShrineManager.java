@@ -15,6 +15,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -128,6 +129,14 @@ public class ShrineManager implements Listener {
 	}
 	@EventHandler (priority = EventPriority.MONITOR)
 	public void onBlockBurn(BlockBurnEvent e) {
+		if (!Settings.getEnabledWorlds().contains(e.getBlock().getWorld()))
+			return;
+		for (WriteLocation center : DUtil.getAllShrines())
+			if ((DUtil.toWriteLocation(e.getBlock().getLocation())).equalsApprox(center))
+				e.setCancelled(true);
+	}
+	@EventHandler (priority = EventPriority.MONITOR)
+	public void onPistonEvent(BlockPistonExtendEvent e) {
 		if (!Settings.getEnabledWorlds().contains(e.getBlock().getWorld()))
 			return;
 		for (WriteLocation center : DUtil.getAllShrines())
