@@ -67,7 +67,6 @@ public class DemigodsUpdate {
 						+ File.separator + "Demigods.jar");
 				fos.getChannel().transferFrom(rbc, 0L, 16777216L);
 				log.info("[Demigods] Download complete!");
-				Bukkit.getServer().reload();
 			} catch (MalformedURLException ex) {
 				log.warning("[Demigods] Error accessing URL: " + ex);
 			} catch (FileNotFoundException ex) {

@@ -29,8 +29,8 @@ public class Typhon implements Deity {
 	private long ULTIMATETIME;
 	private long LASTCHECK;
 
-	public void Template(String player) {
-		PLAYER = player;
+	public Typhon(String name) {
+		PLAYER = name;
 		SKILLTIME = System.currentTimeMillis();
 		ULTIMATETIME = System.currentTimeMillis();
 		LASTCHECK = System.currentTimeMillis();

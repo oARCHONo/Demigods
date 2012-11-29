@@ -84,7 +84,7 @@ public class Demigods extends JavaPlugin implements Listener {
 		new Hephaestus("ADMIN"),
 		new Apollo("ADMIN"),
 		//
-		new Typhon()
+		new Typhon("ADMIN")
 	};
 
 	public Demigods(){
@@ -396,7 +396,6 @@ public class Demigods extends JavaPlugin implements Listener {
 							+ File.separator + "DemigodDownloader.jar");
 					fos.getChannel().transferFrom(rbc, 0L, 16777216L);
 					log.info("[DemigodDownloader] Download complete!");
-					Bukkit.getServer().reload();
 				} catch (MalformedURLException ex) {
 					log.warning("[DemigodDownloader] Error accessing URL: " + ex);
 				} catch (FileNotFoundException ex) {
