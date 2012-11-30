@@ -59,7 +59,7 @@ public class DemigodsUpdate {
 		{
 			try
 			{
-				// Disable the plugin so it's all safe and sound while we update
+				// Disable the plugin so it's all safe and sound while we update it
 				Bukkit.getServer().getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("Demigods"));
 				
 				// Define variables

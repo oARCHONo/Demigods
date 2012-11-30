@@ -94,7 +94,7 @@ public class Demigods extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		long firstTime = System.currentTimeMillis();
-		oldDownloader(); // #0 (disable old update method)
+		oldDownloader(); // #0 (disable our old update method)
 		log.info("[Demigods] Initializing.");
 		new Settings(this); // #1 (needed for DUtil to load)
 		log.info("[Demigods] Updating configuration.");
