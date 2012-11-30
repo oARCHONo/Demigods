@@ -116,6 +116,7 @@ public class CommandManager implements CommandExecutor, Listener {
 			e.setCancelled(true);
 		}
 	}
+	@SuppressWarnings("incomplete-switch")
 	@Override
 	public boolean onCommand(CommandSender sender, Command c, String label, String[] args) {
 		Player p = null;

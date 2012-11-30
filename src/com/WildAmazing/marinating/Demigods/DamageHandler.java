@@ -83,6 +83,7 @@ public class DamageHandler implements Listener {
 		if (disp < 1) disp = 1;
 		p.setHealth(disp);
 	}
+	@SuppressWarnings("incomplete-switch")
 	public static int armorReduction(Player p) {
 		if (p.getLastDamageCause() != null)
 			if ((p.getLastDamageCause().getCause() == DamageCause.FIRE) || (p.getLastDamageCause().getCause() == DamageCause.FIRE_TICK) || (p.getLastDamageCause().getCause() == DamageCause.SUFFOCATION) ||

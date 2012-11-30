@@ -111,7 +111,7 @@ public class DeityManager implements Listener {
 		if (Settings.getSettingBoolean("motd")) {
 			p.sendMessage("This server is running Demigods v"+ChatColor.YELLOW+DUtil.getPlugin().getDescription().getVersion()+ChatColor.WHITE+".");
 			p.sendMessage(ChatColor.GRAY+"Type "+ChatColor.GREEN+"/dg"+ChatColor.GRAY+" for more info.");
-			if ((Settings.getSettingBoolean("update-notify")) && (DemigodsUpdate.shouldUpdate()) && DUtil.hasPermissionOrOP(p, "demigods.admin")) {
+			if ((!Settings.getSettingBoolean("update")) && (DemigodsUpdate.shouldUpdate()) && DUtil.hasPermissionOrOP(p, "demigods.admin")) {
 				p.sendMessage(ChatColor.RED + "There is a new, stable release for Infractions.");
 				p.sendMessage(ChatColor.RED + "Please update ASAP.");
 				p.sendMessage(ChatColor.GREEN + "Latest: http://clashnia.com/plugins/demigods/Demigods.jar");

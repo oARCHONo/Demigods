@@ -1,7 +1,7 @@
 #default config.yml
 #Demigods Configuration File
 #Global Settings
-update-notify: true
+update: true
 motd: true
 active_worlds: DEFAULT
 globalfavormultiplier: 1.0

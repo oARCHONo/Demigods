@@ -98,6 +98,7 @@ public class Apollo implements Deity {
 		p.sendMessage(ChatColor.YELLOW+"Select item: jukebox");
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	@Override
 	public void onEvent(Event ee) {
 		if (ee instanceof PlayerInteractEvent) {

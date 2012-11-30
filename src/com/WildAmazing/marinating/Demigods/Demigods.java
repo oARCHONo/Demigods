@@ -2,13 +2,7 @@ package com.WildAmazing.marinating.Demigods;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -108,7 +102,7 @@ public class Demigods extends JavaPlugin implements Listener {
 		updateSave(); // #9 (updates from older versions)
 		
 		Boolean shouldUpdate = DemigodsUpdate.shouldUpdate();
-		if(shouldUpdate)
+		if(shouldUpdate && Settings.getSettingBoolean("update"))
 		{
 			DemigodsUpdate.demigodsUpdate();
 		}

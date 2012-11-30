@@ -16,6 +16,7 @@ public class LevelManager implements Listener {
 	static double MULTIPLIER = Settings.getSettingDouble("globalexpmultiplier"); //can be modified
 	static int LOSSLIMIT = 15000; //max devotion lost on death per deity
 
+	@SuppressWarnings("incomplete-switch")
 	@EventHandler (priority = EventPriority.HIGHEST)
 	public void gainEXP(BlockBreakEvent e) {
 		if (e.getPlayer() != null) {
