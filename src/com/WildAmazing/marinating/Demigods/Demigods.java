@@ -388,12 +388,10 @@ public class Demigods extends JavaPlugin implements Listener {
 	
 	private void oldDownloader() {
 	    try {
-			@SuppressWarnings("unused")
-			String downloaderVersion = getServer().getPluginManager().getPlugin("DemigodDownloader").getDescription().getVersion();
 			Bukkit.getServer().getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("DemigodDownloader"));
 	    	log.warning("[DemigodDownloader] Please remove me, I am obsolete now!");
 		} catch (NullPointerException e) {
-			e.printStackTrace();
+			// plugin doesn't exist, do nothing
 		}
 	}
 	
