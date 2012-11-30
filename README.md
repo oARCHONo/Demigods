@@ -8,7 +8,7 @@ Not to be confused with other RPG plugins that focus on skills and classes alone
 Installation
 ============
 
-To install, simply place the **Demigods.jar** (http://www.clashnia.com/plugins/demigods/Demigods.jar) in your plugins folder and run the server. That's it. Everything else is handled automatically.
+To install, simply place the [Demigods.jar](http://www.clashnia.com/plugins/demigods/Demigods.jar) in your plugins folder and run the server. That's it. Everything else is handled automatically.
 
 Features
 ========
@@ -23,15 +23,15 @@ Key features of this plugin include:
 
 **Favor:** Favor is limited to a cap that can be raised by tributing. Favor is spent on Demigods skills, and is regenerated over time.
 
-Still confused?  Watch the following tutorial on YouTube: http://youtu.be/fpG99a-sduk
+Still confused?  [Watch this easy tutorial on YouTube!](http://youtu.be/fpG99a-sduk)
 
 More Documentation
 ==================
 
 **Check these other pages for more detailed descriptions on other elements of Demigods:**
 
-* http://dev.bukkit.org/server-mods/demigods/pages/commands/ - Commands
-* http://dev.bukkit.org/server-mods/demigods/pages/permissions/ - Permissions
-* http://dev.bukkit.org/server-mods/demigods/pages/config-guide/ - Configuration
-* http://dev.bukkit.org/server-mods/demigods/pages/debugging-player-files/ - Debugging Player Files
-* http://forums.bukkit.org/threads/21186/ - Bukkit Forum Topic
+* [Commands](http://dev.bukkit.org/server-mods/demigods/pages/commands/)
+* [Permissions](http://dev.bukkit.org/server-mods/demigods/pages/permissions/)
+* [Configuration](http://dev.bukkit.org/server-mods/demigods/pages/config-guide/)
+* [Debugging Player Files](http://dev.bukkit.org/server-mods/demigods/pages/debugging-player-files/)
+* [Bukkit Forum Topic](http://forums.bukkit.org/threads/21186/)
