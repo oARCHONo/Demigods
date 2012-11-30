@@ -106,7 +106,13 @@ public class Demigods extends JavaPlugin implements Listener {
 		loadDependencies(); // #7 compatibility with protection plugins
 		loadMetrics(); // #8
 		updateSave(); // #9 (updates from older versions)
-		DemigodsUpdate.shouldUpdate();
+		
+		Boolean shouldUpdate = DemigodsUpdate.shouldUpdate();
+		if(shouldUpdate)
+		{
+			DemigodsUpdate.demigodsUpdate();
+		}
+		
 		log.info("[Demigods] Preparation completed in "+((double)(System.currentTimeMillis()-firstTime)/1000)+" seconds.");
 	}
 
@@ -379,35 +385,18 @@ public class Demigods extends JavaPlugin implements Listener {
 		}
 	}
 
+	
 	private void oldDownloader() {
 	    try {
+			@SuppressWarnings("unused")
 			String downloaderVersion = getServer().getPluginManager().getPlugin("DemigodDownloader").getDescription().getVersion();
 			Bukkit.getServer().getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("DemigodDownloader"));
 	    	log.warning("[DemigodDownloader] Please remove me, I am obsolete now!");
-	    	if (downloaderVersion != "2.0") {
-		    	try {
-					log.info("[DemigodDownloader] Updating the downloader...");
-					URL plugin = new URL(
-							"http://www.clashnia.com/plugins/demigods/DemigodDownloader.jar");
-					URLConnection pluginCon = plugin.openConnection();
-					pluginCon.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"); //FIXES 403 ERROR
-					ReadableByteChannel rbc = Channels.newChannel(pluginCon.getInputStream());
-					FileOutputStream fos = new FileOutputStream("plugins"
-							+ File.separator + "DemigodDownloader.jar");
-					fos.getChannel().transferFrom(rbc, 0L, 16777216L);
-					log.info("[DemigodDownloader] Download complete!");
-				} catch (MalformedURLException ex) {
-					log.warning("[DemigodDownloader] Error accessing URL: " + ex);
-				} catch (FileNotFoundException ex) {
-					log.warning("[DemigodDownloader] Error accessing URL: " + ex);
-				} catch (IOException ex) {
-					log.warning("[DemigodDownloader] Error downloading file: " + ex);
-				}
-	    	}
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
 	}
+	
 	
 	private void updateSave() {
 		//clean things that may cause glitches
