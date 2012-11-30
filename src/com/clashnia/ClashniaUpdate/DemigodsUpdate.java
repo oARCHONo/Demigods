@@ -47,9 +47,9 @@ public class DemigodsUpdate {
 				return true;
 			}
 		} catch (MalformedURLException ex) {
-			log.warning("[Demigods] Error accessing version URL.");
+			log.severe("[Demigods] Error accessing version URL.");
 		} catch (IOException ex) {
-			log.warning("[Demigods] Error checking for update.");
+			log.severe("[Demigods] Error checking for update.");
 		}
 		return false;
 	}

@@ -393,21 +393,27 @@ public class Demigods extends JavaPlugin implements Listener {
 			
 			// Set the downloader to a variable for deletion
 	    	File oldDownloader = new File("plugins" + File.separator + "DemigodDownloader.jar");
-	    	log.warning("[Demigods] " + oldDownloader);
 	    	
 	    	// Check file existence and go from there
 	    	if(!oldDownloader.exists())
 	    	{
 	    		// Can't find downloader, let the administrator know
-	    		log.warning("[DemigodDownloader] Can't find DemigodDownloader.jar, has it been renamed?");
+	    		log.severe("[DemigodDownloader] Can't find DemigodDownloader.jar, has it been renamed?");
 	    		log.warning("[DemigodDownloader] Please manually remove the DemigodDownloader, it's obsolete.");
 	    	}
 	    	else
 	    	{
 	    		// Attempt to delete downloader
 	    		boolean success = oldDownloader.delete();
-	    		if(success) log.warning("[DemigodDownloader] Deleting old download method, just relax. :)");
-	    		else log.warning("[DemigodDownloader] There was an error when deleting the downloader.");
+	    		if(success)
+	    		{
+	    			log.info("[DemigodDownloader] Deleting old download method, just relax. :)");
+	    		}
+	    		else
+	    		{
+	    			log.severe("[DemigodDownloader] There was an error when deleting the downloader. Are you using Windows?");
+	    			log.warning("[DemigodDownloader] Please manually remove the DemigodDownloader, it's obsolete.");
+	    		}
 	    	}
 	    	
 		} catch (NullPointerException e) {
