@@ -40,7 +40,12 @@ import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Themis;
 
 import com.clashnia.ClashniaUpdate.DemigodsUpdate;
+import com.clashnia.Demigods.Deities.Giants.Ephialtes;
+import com.clashnia.Demigods.Deities.Giants.Otus;
 import com.clashnia.Demigods.Deities.Giants.Typhon;
+import com.clashnia.Demigods.Deities.Primordial.Chaos;
+import com.clashnia.Demigods.Deities.Primordial.Gaia;
+import com.clashnia.Demigods.Deities.Primordial.Uranus;
 
 import com.WildAmazing.marinating.Demigods.MetricsLite;
 
@@ -48,58 +53,91 @@ import com.massivecraft.factions.P;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 public class Demigods extends JavaPlugin implements Listener {
-	/*
-	 *  Soft dependencies
-	 */
+	// Soft dependencies
 	protected static WorldGuardPlugin WORLDGUARD = null;
 	protected static P FACTIONS = null;
-	/*
-	 * 
-	 */
+
+	// Define variables
 	public static Logger log = Logger.getLogger("Minecraft");
 	static String mainDirectory = "plugins/Demigods/";
 	DUtil initialize;
 	DSave SAVE;
 
-	static Deity[] deities = {
+	static Deity[] deities =
+		{
+		
+		/*
+		 *  Primoridal Deities
+		 */
+		new Chaos("ADMIN"),
+		
+		// Parents to the Titans
+		new Gaia("ADMIN"),
+		new Uranus("ADMIN"),
+		
+		/*
+		 *  Titans
+		 */
+		// Parents to the Olympian Gods
 		new Cronus("ADMIN"),
-		new Prometheus("ADMIN"),
 		new Rhea("ADMIN"),
+		
+		new Prometheus("ADMIN"),
 		new Atlas("ADMIN"),
 		new Oceanus("ADMIN"),
 		new Hyperion("ADMIN"),
 		new Themis("ADMIN"),
-		//
+		
+		/*
+		 *  Olympian Gods
+		 */
+		// The Big Three
 		new Zeus("ADMIN"),
-		new Ares("ADMIN"),
-		new Hades("ADMIN"),
 		new Poseidon("ADMIN"),
+		new Hades("ADMIN"),
+		
+		new Ares("ADMIN"),
 		new Athena("ADMIN"),
-		new Hephaestus("ADMIN"),
 		new Apollo("ADMIN"),
-		//
-		new Typhon("ADMIN")
+		new Hephaestus("ADMIN"),
+		
+		/*
+		 *  Giants
+		 */
+		new Typhon("ADMIN"),
+		
+		// The Aloadae
+		new Otus("ADMIN"),
+		new Ephialtes("ADMIN")
 	};
 
-	public Demigods(){
+	public Demigods()
+	{
 		super();
 	}
 
 	@Override
-	public void onEnable() {
+	public void onEnable()
+	{
 		long firstTime = System.currentTimeMillis();
 		oldDownloader(); // #0 (disable our old update method)
+		
 		log.info("[Demigods] Initializing.");
+		
 		new Settings(this); // #1 (needed for DUtil to load)
-		log.info("[Demigods] Updating configuration.");
 		initialize = new DUtil(this); // #2 (needed for everything else to work)
 		SAVE = new DSave(mainDirectory, deities); // #3 (needed to start save system)
 		loadListeners(); // #4
 		loadCommands(); // #5 (needed)
 		initializeThreads(); // #6 (regen and etc)
 		loadDependencies(); // #7 compatibility with protection plugins
+		
+		log.info("[Demigods] Attempting to load Metrics.");
+		
 		loadMetrics(); // #8
 		updateSave(); // #9 (updates from older versions)
+		
+		// Check for updates, and then update if need be
 		
 		Boolean shouldUpdate = DemigodsUpdate.shouldUpdate();
 		if(shouldUpdate && Settings.getSettingBoolean("update"))
@@ -111,16 +149,25 @@ public class Demigods extends JavaPlugin implements Listener {
 	}
 
 	@Override
-	public void onDisable() {
-		try {
+	public void onDisable()
+	{
+		// Try to save files, if it can't, then let the Administrator know
+		try
+		{
 			DSave.save(mainDirectory);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			log.severe("[Demigods] Save location error. Screenshot the stack trace and send to marinating.");
-		} catch (IOException e) {
-			e.printStackTrace();
-			log.severe("[Demigods] Save write error. Screenshot the stack trace and send to marinating.");
 		}
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+			log.severe("[Demigods] Save location error. Screenshot the stack trace and send to us on BukketDev.");
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			log.severe("[Demigods] Save write error. Screenshot the stack trace and send to us on BukketDev.");
+		}
+		
+		// Cancel all tasks
 		int c = 0;
 		for (BukkitWorker bw : getServer().getScheduler().getActiveWorkers())
 			if (bw.getOwner().equals(this))
@@ -129,97 +176,118 @@ public class Demigods extends JavaPlugin implements Listener {
 			if (bt.getOwner().equals(this))
 				c++;
 		this.getServer().getScheduler().cancelTasks(this);
+		
 		log.info("[Demigods] Save completed and "+c+" tasks cancelled.");
 	}
 
 	@EventHandler
-	public void saveOnExit(PlayerQuitEvent e) {
+	public void saveOnExit(PlayerQuitEvent e)
+	{
+		// Save a player file when they exit, if it can't, let the Administrator know
 		if (DUtil.isFullParticipant(e.getPlayer()))
-			try {
+			try 
+			{
 				DSave.save(mainDirectory);
-			} catch (FileNotFoundException er) {
+			} 
+			catch (FileNotFoundException er) 
+			{
 				er.printStackTrace();
-				log.severe("[Demigods] Save location error. Screenshot the stack trace and send to marinating.");
-			} catch (IOException er) {
+				log.severe("[Demigods] Save location error. Screenshot the stack trace and send to us on BukketDev.");
+			} 
+			catch (IOException er) 
+			{
 				er.printStackTrace();
-				log.severe("[Demigods] Save write error. Screenshot the stack trace and send to marinating.");
+				log.severe("[Demigods] Save write error. Screenshot the stack trace and send to us on BukketDev.");
 			}
 	}
 
-	public void loadDependencies() {
+	public void loadDependencies()
+	{
+		// Check for the WorldGuard plugin
 		Plugin pg = getServer().getPluginManager().getPlugin("WorldGuard");
-		if ((pg != null) && (pg instanceof WorldGuardPlugin)) {
+		if ((pg != null) && (pg instanceof WorldGuardPlugin))
+		{
 			WORLDGUARD = (WorldGuardPlugin)pg;
 			if (!Settings.getSettingBoolean("allow_skills_everywhere"))
 				log.info("[Demigods] WorldGuard detected. Skills are disabled in no-PvP zones.");
 		}
+		
+		// Check for the Factions plugin
 		pg = getServer().getPluginManager().getPlugin("Factions");
-		if (pg != null) {
+		if (pg != null)
+		{
 			FACTIONS = ((P)pg);
 			if (!Settings.getSettingBoolean("allow_skills_everywhere"))
 				log.info("[Demigods] Factions detected. Skills are disabled in peaceful zones.");
 		}
+		
+		// Check to see if a player has the SimpleNotice client mod installed
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "SimpleNotice");
 	}
 	
-	public void loadMetrics() {
-		try {
+	public void loadMetrics()
+	{
+		// Attempt to send metrics to the mcstats.org website
+		try
+		{
 			MetricsLite metrics = new MetricsLite(this);
 			metrics.start();
-		} catch (IOException e) {
-			// Failed to submit the stats :-(
+		}
+		catch (IOException e)
+		{
+			// Failed to submit the stats
 		}
 	}
 
-	public void loadCommands() {
-		//for help files
+	public void loadCommands()
+	{
+		// Register the command manager
 		CommandManager ce = new CommandManager(this);
-		//general
 		getServer().getPluginManager().registerEvents(ce, this);
+		
+		/*
+		 *  General commands
+		 */
 		getCommand("dg").setExecutor(ce);
 		getCommand("check").setExecutor(ce);
 		getCommand("claim").setExecutor(ce);
 		getCommand("alliance").setExecutor(ce);
-		getCommand("perks").setExecutor(ce);
-		getCommand("checkplayer").setExecutor(ce);
-		getCommand("removeplayer").setExecutor(ce);
+		getCommand("perks").setExecutor(ce); //TODO: PERKS
 		getCommand("value").setExecutor(ce);
 		getCommand("bindings").setExecutor(ce);
+		getCommand("forsake").setExecutor(ce);
+		getCommand("adddevotion").setExecutor(ce);
+		
+		/*
+		 *  Admin Commands
+		 */
+		getCommand("checkplayer").setExecutor(ce);
+		getCommand("removeplayer").setExecutor(ce);
 		getCommand("debugplayer").setExecutor(ce);
-
 		getCommand("setallegiance").setExecutor(ce);
-
 		getCommand("getfavor").setExecutor(ce);
 		getCommand("setfavor").setExecutor(ce);
 		getCommand("addfavor").setExecutor(ce);
-
 		getCommand("getmaxfavor").setExecutor(ce);
 		getCommand("setmaxfavor").setExecutor(ce);
 		getCommand("addmaxfavor").setExecutor(ce);
-
 		getCommand("givedeity").setExecutor(ce);
 		getCommand("removedeity").setExecutor(ce);
-		getCommand("forsake").setExecutor(ce);
-
 		getCommand("addunclaimeddevotion").setExecutor(ce);
-
 		getCommand("getdevotion").setExecutor(ce);
-		getCommand("setdevotion").setExecutor(ce);
-		getCommand("adddevotion").setExecutor(ce);
-
+		getCommand("setdevotion").setExecutor(ce);;
 		getCommand("addhp").setExecutor(ce);
 		getCommand("sethp").setExecutor(ce);
-
 		getCommand("setmaxhp").setExecutor(ce);
-
 		getCommand("getascensions").setExecutor(ce);
 		getCommand("setascensions").setExecutor(ce);
 		getCommand("addascensions").setExecutor(ce);
-
 		getCommand("setkills").setExecutor(ce);
 		getCommand("setdeaths").setExecutor(ce);
 
-		//shrine
+		/*
+		 *  Shrine commands
+		 */
 		getCommand("shrine").setExecutor(ce);
 		getCommand("shrinewarp").setExecutor(ce);
 		getCommand("shrineowner").setExecutor(ce);
@@ -227,60 +295,78 @@ public class Demigods extends JavaPlugin implements Listener {
 		getCommand("fixshrine").setExecutor(ce);
 		getCommand("listshrines").setExecutor(ce);
 		getCommand("nameshrine").setExecutor(ce);
-		//zeus
+		
+		/*
+		 *  Deity Commands
+		 */
+		// Zeus
 		getCommand("shove").setExecutor(ce);
 		getCommand("lightning").setExecutor(ce);
 		getCommand("storm").setExecutor(ce);
-		//ares
+		
+		// Ares
 		getCommand("strike").setExecutor(ce);
 		getCommand("bloodthirst").setExecutor(ce);
 		getCommand("crash").setExecutor(ce);
-		//cronus
+		
+		// Cronus
 		getCommand("slow").setExecutor(ce);
 		getCommand("cleave").setExecutor(ce);
 		getCommand("timestop").setExecutor(ce);
-		//prometheus
+		
+		// Prometheus
 		getCommand("fireball").setExecutor(ce);
 		getCommand("blaze").setExecutor(ce);
 		getCommand("firestorm").setExecutor(ce);
-		//rhea
+		
+		// Rhea
 		getCommand("poison").setExecutor(ce);
 		getCommand("plant").setExecutor(ce);
 		getCommand("detonate").setExecutor(ce);
 		getCommand("entangle").setExecutor(ce);
-		//hades
+		
+		// Hades
 		getCommand("chain").setExecutor(ce);
 		getCommand("entomb").setExecutor(ce);
 		getCommand("tartarus").setExecutor(ce);
-		//poseidon
+		
+		// Poseidon
 		getCommand("reel").setExecutor(ce);
 		getCommand("drown").setExecutor(ce);
 		getCommand("waterfall").setExecutor(ce);
-		//atlas
+		
+		// Atlas
 		getCommand("unburden").setExecutor(ce);
 		getCommand("invincible").setExecutor(ce);
-		//athena
+		
+		// Athena
 		getCommand("flash").setExecutor(ce);
 		getCommand("ceasefire").setExecutor(ce);
-		//oceanus
+		
+		// Oceanus
 		getCommand("squid").setExecutor(ce);
 		getCommand("makeitrain").setExecutor(ce);
-		//hyperion
+		
+		// Hyperion
 		getCommand("starfall").setExecutor(ce);
 		getCommand("smite").setExecutor(ce);
-		//hephaestus
+		
+		// Hephaestus
 		getCommand("reforge").setExecutor(ce);
 		getCommand("shatter").setExecutor(ce);
-		//apollo
+		
+		// Apollo
 		getCommand("cure").setExecutor(ce);
 		getCommand("finale").setExecutor(ce);
-		//themis
+		
+		// Themis
 		getCommand("swap").setExecutor(ce);
 		getCommand("congregate").setExecutor(ce);
 		getCommand("assemble").setExecutor(ce);
 	}
 
-	public void loadListeners(){
+	public void loadListeners()
+	{
 		getServer().getPluginManager().registerEvents(new ShrineManager(), this);
 		getServer().getPluginManager().registerEvents(new DeityManager(), this);
 		getServer().getPluginManager().registerEvents(new LevelManager(), this);
@@ -289,7 +375,9 @@ public class Demigods extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(new Hephaestus("LISTENER"), this);
 	}
 
-	private void initializeThreads() {
+	private void initializeThreads()
+	{
+		// Setup threads for saving, health, and favor
 		int startdelay = (int)(Settings.getSettingDouble("start_delay_seconds")*20);
 		int favorfrequency = (int)(Settings.getSettingDouble("favor_regen_seconds")*20);
 		int hpfrequency = (int)(Settings.getSettingDouble("hp_regen_seconds")*20);
@@ -298,13 +386,18 @@ public class Demigods extends JavaPlugin implements Listener {
 		if (favorfrequency < 0) favorfrequency = 600;
 		if (startdelay <= 0) startdelay = 1;
 		if (savefrequency <= 0) savefrequency = 300;
-		//favor
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+		
+		// Favor
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
+		{
 			@Override
-			public void run() {
-				for (World w : Settings.getEnabledWorlds()) {
+			public void run()
+			{
+				for (World w : Settings.getEnabledWorlds())
+				{
 					for (Player p : w.getPlayers())
-						if (DUtil.isFullParticipant(p)) {
+						if (DUtil.isFullParticipant(p))
+						{
 							int regenrate = DUtil.getAscensions(p); //TODO: PERK UPGRADES THIS
 							if (regenrate < 1) regenrate = 1;
 							DUtil.setFavorQuiet(p.getName(), DUtil.getFavor(p)+regenrate);
@@ -312,13 +405,18 @@ public class Demigods extends JavaPlugin implements Listener {
 				}
 			}
 		}, startdelay, favorfrequency);
-		//health regen
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+		
+		// Health regeneration
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
+		{
 			@Override
-			public void run() {
-				for (World w : Settings.getEnabledWorlds()) {
+			public void run()
+			{
+				for (World w : Settings.getEnabledWorlds())
+				{
 					for (Player p : w.getPlayers())
-						if (DUtil.isFullParticipant(p)) {
+						if (DUtil.isFullParticipant(p))
+						{
 							if ((p.getHealth() < 1) || (DUtil.getHP(p) < 1)) continue;
 							int heal = 1; //TODO: PERK UPGRADES THIS
 							if (heal < 1) heal = 1;
@@ -328,11 +426,14 @@ public class Demigods extends JavaPlugin implements Listener {
 				}
 			}
 		}, startdelay, hpfrequency);
-		//health sync
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+		
+		// Health sync
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
+		{
 			@Override
 			public void run() {
-				for (World w : Settings.getEnabledWorlds()) {
+				for (World w : Settings.getEnabledWorlds())
+				{
 					for (Player p : w.getPlayers())
 						if (DUtil.isFullParticipant(p))
 							if (p.getHealth() > 0)
@@ -340,29 +441,42 @@ public class Demigods extends JavaPlugin implements Listener {
 				}
 			}
 		}, startdelay, 2);
-		//data save
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+		
+		// Data save
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
+		{
 			@Override
-			public void run() {
-				try {
+			public void run()
+			{
+				try
+				{
 					DSave.save(mainDirectory);
 					log.info("[Demigods] Saved data for "+DUtil.getFullParticipants().size()+" Demigods players. "+DSave.getCompleteData().size()+" files total.");
-				} catch (FileNotFoundException e) {
+				}
+				catch (FileNotFoundException e)
+				{
 					e.printStackTrace();
 					log.severe("[Demigods] Save location error. Screenshot the stack trace and send to marinating.");
-				} catch (IOException e) {
+				}
+				catch (IOException e)
+				{
 					e.printStackTrace();
 					log.severe("[Demigods] Save write error. Screenshot the stack trace and send to marinating.");
 				}
 			}
 		}, startdelay, savefrequency);
-		//information display
+		
+		// Information display
 		int frequency = (int)(Settings.getSettingDouble("stat_display_frequency_in_seconds")*20);
-		if (frequency > 0) {
-			getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+		if (frequency > 0)
+		{
+			getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
+			{
 				@Override
-				public void run() {
-					for (World w : Settings.getEnabledWorlds()) {
+				public void run()
+				{
+					for (World w : Settings.getEnabledWorlds())
+					{
 						for (Player p : w.getPlayers())
 							if (DUtil.isFullParticipant(p))
 								if (p.getHealth() > 0) {
@@ -380,8 +494,10 @@ public class Demigods extends JavaPlugin implements Listener {
 	}
 
 	
-	private void oldDownloader() {
-	    try {
+	private void oldDownloader()
+	{
+	    try
+	    {
 	    	// Disable old downloader plugin
 			Bukkit.getServer().getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("DemigodDownloader"));
 			
@@ -410,32 +526,42 @@ public class Demigods extends JavaPlugin implements Listener {
 	    		}
 	    	}
 	    	
-		} catch (NullPointerException e) {
-			// plugin doesn't exist, do nothing
+		}
+	    catch (NullPointerException e)
+	    {
+			// Plugin doesn't exist, do nothing
 		}
 	}
 	
 	
-	private void updateSave() {
-		//clean things that may cause glitches
-		for (String player : DUtil.getFullParticipants()) {
-			for (Deity d : DUtil.getDeities(player)) {
-				if (DSave.hasData(player, d.getName().toUpperCase()+"_TRIBUTE_")) {
+	private void updateSave()
+	{
+		// Clean things that may cause glitches
+		for (String player : DUtil.getFullParticipants())
+		{
+			for (Deity d : DUtil.getDeities(player))
+			{
+				if (DSave.hasData(player, d.getName().toUpperCase()+"_TRIBUTE_"))
+				{
 					DSave.removeData(player, d.getName().toUpperCase()+"_TRIBUTE_");
 				}
 			}
 		}
-		//updating to 1.1
+		
+		// Updating to 1.1
 		HashMap<String, HashMap<String, Object>> copy = DSave.getCompleteData();
 		String updated = "[Demigods] Updated players:";
 		boolean yes = false;
-		for (String player : DSave.getCompleteData().keySet()) {
-			if (DSave.hasData(player, "dEXP")) { //coming from pre 1.1
+		for (String player : DSave.getCompleteData().keySet())
+		{
+			if (DSave.hasData(player, "dEXP"))
+			{ // Coming from pre 1.1
 				yes = true;
 				copy.get(player).remove("dEXP");
 				if (DSave.hasData(player, "LEVEL"))
 					copy.get(player).remove("LEVEL");
-				for (Deity d : DUtil.getDeities(player)) {
+				for (Deity d : DUtil.getDeities(player))
+				{
 					copy.get(player).put(d.getName()+"_dvt", (int)Math.ceil((500*Math.pow(DUtil.getAscensions(player), 1.98))/DUtil.getDeities(player).size()));
 				}
 				if (!DSave.hasData(player, "A_EFFECTS"))
@@ -448,11 +574,13 @@ public class Demigods extends JavaPlugin implements Listener {
 		if (yes)
 			log.info(updated);
 		DSave.overwrite(copy);
+		
 		/*
 		 * Level players
 		 */
 		for (String player : DSave.getCompleteData().keySet())
 			LevelManager.levelProcedure(player);
+		
 		/*
 		 * Remove invalid shrines
 		 */
@@ -470,14 +598,18 @@ public class Demigods extends JavaPlugin implements Listener {
 		}
 		if (count > 0)
 			log.info("[Demigods] Removed "+count+" invalid shrines.");
+		
 		/*
 		 * Unstick Prometheus fireballs
 		 */
-		for (World w : Settings.getEnabledWorlds()) {
+		for (World w : Settings.getEnabledWorlds())
+		{
 			Iterator<Entity> it = w.getEntities().iterator();
-			while (it.hasNext()) {
+			while (it.hasNext())
+			{
 				Entity e = it.next();
-				if ((e instanceof net.minecraft.server.EntityFireball) || (e instanceof Fireball)) {
+				if ((e instanceof net.minecraft.server.EntityFireball) || (e instanceof Fireball))
+				{
 					e.remove();
 					it.remove();
 				}
