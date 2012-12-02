@@ -1499,4 +1499,16 @@ public class DUtil {
         }
         return null;
     }
+	
+	public static Boolean checkDemigodsMultiWorld()
+	{
+		if (!(getPlugin("DemigodsMultiWorld") == null))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }

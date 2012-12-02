@@ -132,10 +132,13 @@ public class Demigods extends JavaPlugin implements Listener {
 		initializeThreads(); // #6 (regen and etc)
 		loadDependencies(); // #7 compatibility with protection plugins
 		
+		if (DUtil.checkDemigodsMultiWorld()) log.info("[Demigods] Found DemigodsMultiWorld...");
+		else log.info("[Demigods] DemigodsMultiWorld not found...");
+		
 		log.info("[Demigods] Attempting to load Metrics.");
 		
-		loadMetrics(); // #8
-		updateSave(); // #9 (updates from older versions)
+		loadMetrics(); // #9
+		updateSave(); // #10 (updates from older versions)
 		
 		// Check for updates, and then update if need be
 		
@@ -179,7 +182,19 @@ public class Demigods extends JavaPlugin implements Listener {
 		
 		log.info("[Demigods] Save completed and "+c+" tasks cancelled.");
 	}
-
+	
+	public void loadDemigodsMultiWorld()
+	{
+		if (!(DUtil.getPlugin("DemigodsMultiWorld") == null))
+		{
+			log.info("[DemigodsMultiWorld] Initializing.");
+		}
+		else
+		{
+			log.info("[Demigods] DemigodsMutliWorld not found...");
+		}
+	}
+	
 	@EventHandler
 	public void saveOnExit(PlayerQuitEvent e)
 	{
@@ -498,11 +513,18 @@ public class Demigods extends JavaPlugin implements Listener {
 	{
 	    try
 	    {
+	    	// Define variables
+	    	Plugin demigodDownloader = Bukkit.getPluginManager().getPlugin("DemigodDownloader");
+			String demigodDownloaderPath = demigodDownloader.getClass().getProtectionDomain().getCodeSource().getLocation().toString().substring(5);
+			String OS = System.getProperty("os.name");
+			
+			log.info("[DemigodDownloader] " + demigodDownloaderPath);
+	    	
 	    	// Disable old downloader plugin
-			Bukkit.getServer().getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("DemigodDownloader"));
+			Bukkit.getServer().getPluginManager().disablePlugin(demigodDownloader);
 			
 			// Set the downloader to a variable for deletion
-	    	File oldDownloader = new File("plugins" + File.separator + "DemigodDownloader.jar");
+	    	File oldDownloader = new File(demigodDownloaderPath);
 	    	
 	    	// Check file existence and go from there
 	    	if(!oldDownloader.exists())
@@ -519,9 +541,14 @@ public class Demigods extends JavaPlugin implements Listener {
 	    		{
 	    			log.info("[DemigodDownloader] Deleting old download method, just relax. :)");
 	    		}
+	    		else if (OS.contains("windows") || OS.contains("Windows"))
+	    		{
+	    			log.warning("[DemigodDownloader] Windoes does not allow deletion of files that are in use.");
+	    			log.warning("[DemigodDownloader] Please manually remove the DemigodDownloader while the server is off.");
+	    		}
 	    		else
 	    		{
-	    			log.severe("[DemigodDownloader] There was an error when deleting the downloader. Are you using Windows?");
+	    			log.severe("[DemigodDownloader] There was an error when deleting the downloader.  Do you have permission?");
 	    			log.warning("[DemigodDownloader] Please manually remove the DemigodDownloader, it's obsolete.");
 	    		}
 	    	}
