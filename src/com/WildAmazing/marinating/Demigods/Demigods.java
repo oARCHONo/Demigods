@@ -137,8 +137,8 @@ public class Demigods extends JavaPlugin implements Listener {
 		
 		log.info("[Demigods] Attempting to load Metrics.");
 		
-		loadMetrics(); // #9
-		updateSave(); // #10 (updates from older versions)
+		loadMetrics(); // #8
+		updateSave(); // #9 (updates from older versions)
 		
 		// Check for updates, and then update if need be
 		
@@ -181,18 +181,6 @@ public class Demigods extends JavaPlugin implements Listener {
 		this.getServer().getScheduler().cancelTasks(this);
 		
 		log.info("[Demigods] Save completed and "+c+" tasks cancelled.");
-	}
-	
-	public void loadDemigodsMultiWorld()
-	{
-		if (!(DUtil.getPlugin("DemigodsMultiWorld") == null))
-		{
-			log.info("[DemigodsMultiWorld] Initializing.");
-		}
-		else
-		{
-			log.info("[Demigods] DemigodsMutliWorld not found...");
-		}
 	}
 	
 	@EventHandler
