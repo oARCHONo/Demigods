@@ -518,7 +518,7 @@ public class Demigods extends JavaPlugin implements Listener {
 	    	if(!oldDownloader.exists())
 	    	{
 	    		// Can't find downloader, let the administrator know
-	    		log.severe("[DemigodDownloader] Can't find DemigodDownloader.jar, has it been renamed?");
+	    		log.severe("[DemigodDownloader] Can't find the correct jar file...");
 	    		log.warning("[DemigodDownloader] Please manually remove the DemigodDownloader, it's obsolete.");
 	    	}
 	    	else
@@ -531,7 +531,7 @@ public class Demigods extends JavaPlugin implements Listener {
 	    		}
 	    		else if (OS.contains("windows") || OS.contains("Windows"))
 	    		{
-	    			log.warning("[DemigodDownloader] Windoes does not allow deletion of files that are in use.");
+	    			log.warning("[DemigodDownloader] Windows does not allow deletion of files that are in use.");
 	    			log.warning("[DemigodDownloader] Please manually remove the DemigodDownloader while the server is off.");
 	    		}
 	    		else
