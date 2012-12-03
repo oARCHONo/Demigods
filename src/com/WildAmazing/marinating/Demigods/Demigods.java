@@ -132,8 +132,8 @@ public class Demigods extends JavaPlugin implements Listener {
 		initializeThreads(); // #6 (regen and etc)
 		loadDependencies(); // #7 compatibility with protection plugins
 		
-		if (DUtil.checkDemigodsMultiWorld()) log.info("[Demigods] Found DemigodsMultiWorld...");
-		else log.info("[Demigods] DemigodsMultiWorld not found...");
+		if (DUtil.checkDemigodsExpansion()) log.info("[Demigods] Found DemigodsExpansion...");
+		else log.info("[Demigods] DemigodsExpansion not found...");
 		
 		log.info("[Demigods] Attempting to load Metrics.");
 		

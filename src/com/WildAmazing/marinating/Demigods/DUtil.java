@@ -1500,9 +1500,9 @@ public class DUtil {
         return null;
     }
 	
-	public static Boolean checkDemigodsMultiWorld()
+	public static Boolean checkDemigodsExpansion()
 	{
-		if (!(getPlugin("DemigodsMultiWorld") == null))
+		if (!(getPlugin("DemigodsExpansion") == null))
 		{
 			return true;
 		}
