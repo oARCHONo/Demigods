@@ -22,6 +22,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitWorker;
 
+import com.clashnia.ClashniaUpdate.DemigodsUpdate;
+
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Apollo;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Ares;
@@ -39,13 +41,10 @@ import com.WildAmazing.marinating.Demigods.Deities.Titans.Prometheus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Themis;
 
-import com.clashnia.ClashniaUpdate.DemigodsUpdate;
 import com.clashnia.Demigods.Deities.Giants.Ephialtes;
 import com.clashnia.Demigods.Deities.Giants.Otus;
 import com.clashnia.Demigods.Deities.Giants.Typhon;
-import com.clashnia.Demigods.Deities.Primordial.Chaos;
-import com.clashnia.Demigods.Deities.Primordial.Gaia;
-import com.clashnia.Demigods.Deities.Primordial.Uranus;
+
 
 import com.WildAmazing.marinating.Demigods.MetricsLite;
 
@@ -65,15 +64,6 @@ public class Demigods extends JavaPlugin implements Listener {
 
 	static Deity[] deities =
 		{
-		
-		/*
-		 *  Primoridal Deities
-		 */
-		new Chaos("ADMIN"),
-		
-		// Parents to the Titans
-		new Gaia("ADMIN"),
-		new Uranus("ADMIN"),
 		
 		/*
 		 *  Titans
