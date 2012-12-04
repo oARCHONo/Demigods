@@ -3,7 +3,9 @@
 #Global Settings
 update: true
 motd: true
-active_worlds: DEFAULT
+active_worlds:
+- DEFAULT
+inactive_worlds:
 globalfavormultiplier: 1.0
 globalexpmultiplier: 1.0
 globalfavorcap: 20000

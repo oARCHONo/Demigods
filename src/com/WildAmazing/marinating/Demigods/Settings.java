@@ -2,49 +2,84 @@ package com.WildAmazing.marinating.Demigods;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 
 public class Settings {
 
 	static Demigods plugin;
 
-	public Settings(Demigods instance) {
+	public Settings(Demigods instance)
+	{
 		plugin = instance;
 		plugin.getConfig().options().copyDefaults(true);
 		plugin.saveConfig();
 	}
-	public static int getSettingInt(String id) {
+	
+	public static int getSettingInt(String id)
+	{
 		if (plugin.getConfig().isInt(id))
 			return plugin.getConfig().getInt(id);
 		else return -1;
 	}
-	public static String getSettingString(String id) {
+	
+	public static String getSettingString(String id)
+	{
 		if (plugin.getConfig().isString(id))
 			return plugin.getConfig().getString(id);
 		else return null;
 	}
-	public static boolean getSettingBoolean(String id) {
+	
+	public static boolean getSettingBoolean(String id)
+	{
 		if (plugin.getConfig().isBoolean(id))
 			return plugin.getConfig().getBoolean(id);
 		else return true;
 	}
-	public static double getSettingDouble(String id) {
+	
+	public static double getSettingDouble(String id)
+	{
 		if (plugin.getConfig().isDouble(id))
 			return plugin.getConfig().getDouble(id);
 		else return -1;
 	}
-	public static List<World> getEnabledWorlds() {
-		if (!plugin.getConfig().isList("active_worlds"))
-			enableWorlds();
-		else if (plugin.getConfig().getStringList("active_worlds").contains("DEFAULT"))
-			enableWorlds();
-		ArrayList<World> worlds = new ArrayList<World>();
-		for (String s : plugin.getConfig().getStringList("active_worlds")) {
-			worlds.add(plugin.getServer().getWorld(s));
+	
+	public static List<World> getEnabledWorlds()
+	{
+		ArrayList<World> enabledWorlds = new ArrayList<World>();
+		
+		if(plugin.getConfig().isList("active_worlds"))
+		{
+			if(plugin.getConfig().getStringList("active_worlds").contains("DEFAULT"))
+			{
+				enableWorlds();
+			}
+			
+			for (String s : plugin.getConfig().getStringList("active_worlds"))
+			{
+				enabledWorlds.add(plugin.getServer().getWorld(s));
+			}
 		}
-		return worlds;
+		else
+		{
+			for(int count = 0; count < Bukkit.getServer().getWorlds().size(); count++)
+			{
+				for(World w : plugin.getServer().getWorlds())
+				{	
+					if(!plugin.getConfig().getStringList("inactive_worlds").contains(w.getName()))
+					{
+						enabledWorlds.add(w);
+					}
+				}
+			}
+		}
+		
+		return enabledWorlds;
 	}
-	public static void enableWorlds() {
+	
+	public static void enableWorlds()
+	{
 		ArrayList<String> worlds = new ArrayList<String>();
 		for (World w : plugin.getServer().getWorlds())
 			worlds.add(w.getName());
