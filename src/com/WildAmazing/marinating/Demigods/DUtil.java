@@ -467,6 +467,8 @@ public class DUtil {
 	public static void setHP(String p, int amt) {
 		if (amt > getMaxHP(p))
 			amt = getMaxHP(p);
+		if (amt < 0)
+			amt = 0;
 		int c = amt-getHP(p);
 		DSave.saveData(p, "dHP", new Integer(amt));
 		if ((c != 0) && (DUtil.getOnlinePlayer(p) != null)) {
