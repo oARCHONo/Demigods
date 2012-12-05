@@ -58,7 +58,7 @@ public class Typhon implements Deity {
 			return;
 		}
 		p.sendMessage("--"+getName());
-		p.sendMessage("Passive: ");
+		p.sendMessage("Passive: Looks cool.");
 		p.sendMessage("Active: ");
 		p.sendMessage("Ultimate: ");
 		p.sendMessage(ChatColor.YELLOW+"Select item: ");

@@ -34,6 +34,7 @@ import com.WildAmazing.marinating.Demigods.Deities.Titans.Oceanus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Prometheus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Themis;
+import com.clashnia.Demigods.Deities.Giants.Typhon;
 
 public class DCommandExecutor implements CommandExecutor
 {
@@ -623,15 +624,19 @@ public class DCommandExecutor implements CommandExecutor
 			else if (args[0].equalsIgnoreCase("stats")) {
 				int titancount = 0;
 				int godcount = 0;
+				int giantcount = 0;
 				int othercount = 0;
 				int titankills = 0;
 				int godkills = 0;
+				int giantkills = 0;
 				int otherkills = 0;
 				int titandeaths = 0;
 				int goddeaths = 0;
+				int giantdeaths = 0;
 				int otherdeaths = 0;
 				ArrayList<String> onlinegods = new ArrayList<String>();
 				ArrayList<String> onlinetitans = new ArrayList<String>();
+				ArrayList<String> onlinegiants = new ArrayList<String>();
 				ArrayList<String> onlineother = new ArrayList<String>();
 				for (String id : DSave.getCompleteData().keySet()) {
 					try {
@@ -652,6 +657,14 @@ public class DCommandExecutor implements CommandExecutor
 							goddeaths += DUtil.getDeaths(id);
 							if (DUtil.getPlugin().getServer().getPlayer(id).isOnline()) {
 								onlinegods.add(id);
+							}
+						} else if (DUtil.getAllegiance(id).equalsIgnoreCase("giant")) {
+
+							giantcount++;
+							giantkills += DUtil.getKills(id);
+							giantdeaths += DUtil.getDeaths(id);
+							if (DUtil.getPlugin().getServer().getPlayer(id).isOnline()) {
+								onlinegiants.add(id);
 							}
 						} else {
 							if (!DUtil.isFullParticipant(id)) continue;
@@ -683,23 +696,33 @@ public class DCommandExecutor implements CommandExecutor
 					str2 = str2.substring(0, str2.length()-2);
 				}
 				String str3 = "";
-				if (onlineother.size()>0){
-					for (String o : onlineother) {
+				if (onlinegiants.size()>0){
+					for (String o : onlinegiants) {
 						str3 += o+", ";
 					}
 					str3 = str3.substring(0, str3.length()-2);
 				}
+				String str4 = "";
+				if (onlineother.size()>0){
+					for (String o : onlineother) {
+						str4 += o+", ";
+					}
+					str4 = str4.substring(0, str4.length()-2);
+				}
 				p.sendMessage("There are "+ChatColor.GREEN+onlinegods.size()+"/"+ChatColor.YELLOW+godcount+ChatColor.WHITE+" Gods online: "+ChatColor.GOLD+str1);
 				p.sendMessage("There are "+ChatColor.GREEN+onlinetitans.size()+"/"+ChatColor.YELLOW+titancount+ChatColor.WHITE+" Titans online: "+ChatColor.GOLD+str2);
+				p.sendMessage("There are "+ChatColor.GREEN+onlinegiants.size()+"/"+ChatColor.YELLOW+giantcount+ChatColor.WHITE+" Giants online: "+ChatColor.GOLD+str3);
 				if (othercount > 0)
-					p.sendMessage("There are "+ChatColor.GREEN+onlineother.size()+"/"+ChatColor.YELLOW+othercount+ChatColor.WHITE+" other" +
-							" alliance members online: "+ChatColor.GOLD+str3);
-				p.sendMessage("Total God kills: "+ChatColor.GREEN+godkills+ChatColor.YELLOW+" --- "+ChatColor.WHITE+" Total Titan kills: "+ChatColor.RED+titankills);
-				p.sendMessage("God K/D Ratio: "+ChatColor.GREEN+((float)godkills/goddeaths)+ChatColor.YELLOW+" --- "+ChatColor.WHITE+
-						" Titan K/D Ratio: "+ChatColor.RED+((float)titankills/titandeaths));
+					p.sendMessage("There are "+ChatColor.GREEN+onlineother.size()+"/"+ChatColor.YELLOW+othercount+ChatColor.WHITE+" others online: "+ChatColor.GOLD+str4);
+				p.sendMessage("Total God kills: "+ChatColor.GREEN+godkills+ChatColor.YELLOW+" --- "+ChatColor.WHITE+
+						" God K/D Ratio: "+ChatColor.YELLOW+((float)godkills/goddeaths));
+				p.sendMessage("Total Titan kills: "+ChatColor.GREEN+titankills+ChatColor.YELLOW+" --- "+ChatColor.WHITE+
+						" Titan K/D Ratio: "+ChatColor.YELLOW+((float)titankills/titandeaths));
+				p.sendMessage("Total Giant kills: "+ChatColor.GREEN+giantkills+ChatColor.YELLOW+" --- "+ChatColor.WHITE+
+						" Giant K/D Ratio: "+ChatColor.YELLOW+((float)giantkills/giantdeaths));
 				if (othercount > 0) {
-					p.sendMessage("Total Other kills: "+ChatColor.GREEN+otherkills+ChatColor.YELLOW);
-					p.sendMessage("Other K/D Ratio: "+ChatColor.YELLOW+((float)otherkills/otherdeaths));
+					p.sendMessage("Total Other kills: "+ChatColor.GREEN+otherkills+ChatColor.YELLOW+" --- "+ChatColor.WHITE+
+							" Other K/D Ratio: "+ChatColor.YELLOW+((float)otherkills/otherdeaths));
 				}
 			} else if (args[0].equalsIgnoreCase("ranking") || args[0].equalsIgnoreCase("rankings")) {
 				if (DUtil.getFullParticipants().size() < 1) {
@@ -709,8 +732,10 @@ public class DCommandExecutor implements CommandExecutor
 				//get list of gods and titans
 				ArrayList<String> gods = new ArrayList<String>();
 				ArrayList<String> titans = new ArrayList<String>();
+				ArrayList<String> giants = new ArrayList<String>();
 				ArrayList<Long> gr = new ArrayList<Long>();
 				ArrayList<Long> tr = new ArrayList<Long>();
+				ArrayList<Long> ar = new ArrayList<Long>();
 				for (String s : DUtil.getFullParticipants()) {
 					if (DUtil.getAllegiance(s).equalsIgnoreCase("god")) {
 						if (DSave.hasData(s, "LASTLOGINTIME"))
@@ -722,12 +747,19 @@ public class DCommandExecutor implements CommandExecutor
 							if ((Long)DSave.getData(s, "LASTLOGINTIME") < System.currentTimeMillis()-604800000) continue;
 						titans.add(s);
 						tr.add(DUtil.getRanking(s));
+					} else if (DUtil.getAllegiance(s).equalsIgnoreCase("giant")) {
+						if (DSave.hasData(s, "LASTLOGINTIME"))
+							if ((Long)DSave.getData(s, "LASTLOGINTIME") < System.currentTimeMillis()-604800000) continue;
+						giants.add(s);
+						ar.add(DUtil.getRanking(s));
 					}
 				}
 				String[] Gods = new String[gods.size()];
 				String[] Titans = new String[titans.size()];
+				String[] Giants = new String[giants.size()];
 				Long[] GR = new Long[gods.size()];
 				Long[] TR = new Long[titans.size()];
+				Long[] AR = new Long[titans.size()];
 				for (int i=0;i<Gods.length;i++) {
 					Gods[i] = gods.get(i);
 					GR[i] = gr.get(i);
@@ -735,6 +767,10 @@ public class DCommandExecutor implements CommandExecutor
 				for (int i=0;i<Titans.length;i++) {
 					Titans[i] = titans.get(i);
 					TR[i] = tr.get(i);
+				}
+				for (int i=0;i<Giants.length;i++) {
+					Giants[i] = giants.get(i);
+					AR[i] = ar.get(i);
 				}
 				//sort gods
 				for (int i=0;i<Gods.length;i++) {
@@ -774,6 +810,25 @@ public class DCommandExecutor implements CommandExecutor
 					TR[i] = TR[highestIndex];
 					TR[highestIndex] = l;
 				}
+				//sort giantss
+				for (int i=0;i<Giants.length;i++) {
+					int highestIndex = i;
+					long highestRank = AR[i];
+					for (int j=i;j<Giants.length;j++) {
+						if (AR[j] > highestRank) {
+							highestIndex = j;
+							highestRank = AR[j];
+						}
+					}
+					if (highestRank == AR[i])
+						continue;
+					String a = Giants[i];
+					Giants[i] = Giants[highestIndex];
+					Giants[highestIndex] = a;
+					Long l = AR[i];
+					AR[i] = AR[highestIndex];
+					AR[highestIndex] = l;
+				}
 				//print
 				p.sendMessage(ChatColor.GRAY+"----Rankings----");
 				p.sendMessage(ChatColor.GRAY+"Rankings are determined by Devotion, Deities, and Kills.");
@@ -793,7 +848,15 @@ public class DCommandExecutor implements CommandExecutor
 						p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
 					else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
 				}
-				p.sendMessage(ChatColor.GRAY+"To see the full list, use "+ChatColor.YELLOW+"/dg rankings god|titan");
+				int ap = Giants.length;
+				if (ap > 5) ap = 5;
+				p.sendMessage(ChatColor.DARK_RED+"-- Giants");
+				for (int i=0;i<tp;i++) {
+					if (DUtil.getOnlinePlayer(Giants[i]) != null)
+						p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Titans[i]+" :: "+AR[i]);
+					else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Titans[i]+" :: "+AR[i]);
+				}
+				p.sendMessage(ChatColor.GRAY+"To see the full list, use "+ChatColor.YELLOW+"/dg rankings god|titan|giant");
 			}	else {
 				for (Deity deity : DSave.getGlobalList()) {
 					if (deity.getName().equalsIgnoreCase(args[0]))
@@ -899,8 +962,57 @@ public class DCommandExecutor implements CommandExecutor
 							p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
 						else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Titans[i]+" :: "+TR[i]);
 					}
-				} else if (args[1].equalsIgnoreCase("god|titan")) {
-					p.sendMessage("Try "+ChatColor.YELLOW+"/dg ranking god"+ChatColor.WHITE+" or "+ChatColor.YELLOW+"/dg ranking titan");
+				} else if (args[1].equalsIgnoreCase("giant")) {
+					//get list of giantsF
+					ArrayList<String> giants = new ArrayList<String>();
+					ArrayList<Long> ar = new ArrayList<Long>();
+					for (String s : DUtil.getFullParticipants()) {
+						if (DUtil.getAllegiance(s).equalsIgnoreCase("giant")) {
+							if (DSave.hasData(s, "LASTLOGINTIME"))
+								if ((Long)DSave.getData(s, "LASTLOGINTIME") < System.currentTimeMillis()-604800000) continue;
+							giants.add(s);
+							ar.add(DUtil.getRanking(s));
+						}
+					}
+					if (giants.size() < 1) {
+						p.sendMessage(ChatColor.GRAY+"There are no players to rank.");
+						return true;
+					}
+					String[] Giants = new String[giants.size()];
+					Long[] AR = new Long[giants.size()];
+					for (int i=0;i<Giants.length;i++) {
+						Giants[i] = giants.get(i);
+						AR[i] = ar.get(i);
+					}
+					//sort giants
+					for (int i=0;i<Giants.length;i++) {
+						int highestIndex = i;
+						long highestRank = AR[i];
+						for (int j=i;j<Giants.length;j++) {
+							if (AR[j] > highestRank) {
+								highestIndex = j;
+								highestRank = AR[j];
+							}
+						}
+						if (highestRank == AR[i])
+							continue;
+						String a = Giants[i];
+						Giants[i] = Giants[highestIndex];
+						Giants[highestIndex] = a;
+						Long l = AR[i];
+						AR[i] = AR[highestIndex];
+						AR[highestIndex] = l;
+					}
+					//print
+					p.sendMessage(ChatColor.GRAY+"----Giant Rankings----");
+					p.sendMessage(ChatColor.GRAY+"Rankings are determined by Devotion, Deities, and Kills.");
+					for (int i=0;i<Giants.length;i++) {
+						if (DUtil.getOnlinePlayer(Giants[i]) != null)
+							p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Giants[i]+" :: "+AR[i]);
+						else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Giants[i]+" :: "+AR[i]);
+					}
+				} else if (args[1].equalsIgnoreCase("god|titan|giant")) {
+					p.sendMessage("Try "+ChatColor.YELLOW+"/dg ranking god"+ChatColor.WHITE+", "+ChatColor.YELLOW+"/dg ranking titan"+ChatColor.WHITE+", or "+ChatColor.YELLOW+"/dg ranking giant");
 				}
 			}
 		} else if (args.length == 3) {
@@ -1795,15 +1907,18 @@ public class DCommandExecutor implements CommandExecutor
 			case IRON_INGOT: choice = new Zeus(p.getName()); break;
 			case WATER_BUCKET: choice = new Poseidon(p.getName()); break;
 			case BONE: choice = new Hades(p.getName()); break;
+			//
 			case SOUL_SAND: choice = new Cronus(p.getName()); break;
 			case CLAY_BALL: choice = new Prometheus(p.getName()); break;
 			case VINE: choice = new Rhea(p.getName()); break;
+			//
+			case SULPHUR: choice = new Typhon(p.getName()); break;
 			}
 			if (choice != null) {
 				p.sendMessage(ChatColor.YELLOW+"The Fates ponder your decision...");
 				final Deity fchoice = choice;
 				final Player pl = p;
-				if (BALANCETEAMS && DUtil.hasAdvantage(fchoice.getDefaultAlliance(), ADVANTAGEPERCENT)) {
+				if (BALANCETEAMS && DUtil.hasAdvantage(fchoice.getDefaultAlliance(), ADVANTAGEPERCENT) && (choice != new Typhon(p.getName()))) {
 					pl.sendMessage(ChatColor.RED+"The Fates have determined that your selection would");
 					pl.sendMessage(ChatColor.RED+"unbalance the order of the universe. Try again");
 					pl.sendMessage(ChatColor.RED+"later or select a different deity.");
@@ -1844,6 +1959,8 @@ public class DCommandExecutor implements CommandExecutor
 		case INK_SACK: choice = new Oceanus(p.getName()); break;
 		case GLOWSTONE: choice = new Hyperion(p.getName()); break;
 		case COMPASS: choice = new Themis(p.getName()); break;
+		//
+		case SULPHUR: choice = new Typhon(p.getName()); break;
 		}
 		if (choice == null) {
 			p.sendMessage(ChatColor.YELLOW+"That is not a valid selection item.");

@@ -1,8 +1,6 @@
 package com.WildAmazing.marinating.Demigods.Deities.Gods;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -62,7 +60,7 @@ public class Hephaestus implements Deity, Listener {
 			//
 			p.sendMessage("--"+ChatColor.GOLD+getName()+ChatColor.GRAY+"["+devotion+"]");
 			p.sendMessage(":Furnaces up to "+passiverange+" blocks away produce double yields.");
-			p.sendMessage(":Immune to lava damage.");
+			p.sendMessage(":Immune to fire damage.");
 			p.sendMessage(":Repair the item in hand by up to "+repairamt+"% of its durability.");
 			p.sendMessage(ChatColor.GREEN+" /reforge "+ChatColor.YELLOW+"Costs "+SKILLCOST+" Favor.");
 			p.sendMessage(":Hephaestus cripples the durability of enemy weapons and armor.");
@@ -72,7 +70,7 @@ public class Hephaestus implements Deity, Listener {
 		}
 		p.sendMessage("--"+getName());
 		p.sendMessage("Passive: Doubles the output of nearby furnaces.");
-		p.sendMessage("Passive: Immune to lava damage.");
+		p.sendMessage("Passive: Immune to fire damage.");
 		p.sendMessage("Active: Repair the durability of an item in hand. "+ChatColor.GREEN+"/reforge");
 		p.sendMessage(ChatColor.YELLOW+"Costs "+SKILLCOST+" Favor.");
 		p.sendMessage("Ultimate: Hephaestus unforges the weapons and armor of your");
@@ -88,23 +86,10 @@ public class Hephaestus implements Deity, Listener {
 				Player p = (Player)e.getEntity();
 				if (!DUtil.hasDeity(p, getName()) || !DUtil.isFullParticipant(p))
 					return;
-				if ((e.getCause()==DamageCause.LAVA) || (e.getCause() == DamageCause.FIRE) || (e.getCause() == DamageCause.FIRE_TICK)) {
-					for (int i=-1;i<=1;i++) {
-						for (int j=-1;j<=1;j++) {
-							Block b = p.getWorld().getBlockAt(p.getLocation().getBlockX()+i, p.getLocation().getBlockY(), p.getLocation().getBlockZ()+j);
-							if ((b.getType() == Material.LAVA) || (b.getType() == Material.STATIONARY_LAVA)) {
-								p.setFireTicks(0);
-								e.setDamage(0);
-								e.setCancelled(true);
-							}
-							b = p.getWorld().getBlockAt(p.getEyeLocation().getBlockX()+i, p.getEyeLocation().getBlockY(), p.getEyeLocation().getBlockZ()+j);
-							if ((b.getType() == Material.LAVA) || (b.getType() == Material.STATIONARY_LAVA)) {
-								p.setFireTicks(0);
-								e.setDamage(0);
-								e.setCancelled(true);
-							}
-						}
-					}
+				if ((e.getCause() == DamageCause.FIRE) || (e.getCause() == DamageCause.FIRE_TICK))
+				{
+					p.setFireTicks(0);
+					e.setDamage(0);
 				}
 			}
 		}
