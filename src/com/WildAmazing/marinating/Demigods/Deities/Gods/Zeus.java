@@ -246,6 +246,7 @@ public class Zeus implements Deity {
 					p.sendMessage("In exchange for "+ChatColor.AQUA+ZEUSULTIMATECOST+ChatColor.WHITE+" Favor, ");
 					p.sendMessage(ChatColor.GOLD+"Zeus"+ChatColor.WHITE+" has unloaded his wrath on "+num+" targets.");
 					DUtil.setFavor(p, DUtil.getFavor(p)-ZEUSULTIMATECOST);
+					p.setNoDamageTicks(1000);
 					ZEUSULTIMATETIME = System.currentTimeMillis()+t*1000;
 				} else p.sendMessage(ChatColor.YELLOW+"There are no targets nearby.");
 			} else p.sendMessage(ChatColor.YELLOW+"Lightning storm requires "+ZEUSULTIMATECOST+" Favor.");

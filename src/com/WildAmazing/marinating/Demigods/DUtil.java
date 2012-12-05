@@ -45,6 +45,16 @@ public class DUtil {
 	public DUtil(Demigods d) {
 		plugin = d;
 	}
+	
+	public static void consoleMSG(String level, String msg)
+	{
+		// Define variables
+		Logger log = Logger.getLogger("Minecraft");
+		
+		if(level.equalsIgnoreCase("info")) log.info("[Demigods] " + msg);
+		if(level.equalsIgnoreCase("warning")) log.warning("[Demigods] " + msg);
+		if(level.equalsIgnoreCase("severe")) log.severe("[Demigods] " + msg);
+	}
 
 	public static Player getOnlinePlayer(String name) {
 		return plugin.getServer().getPlayer(name);
@@ -202,6 +212,16 @@ public class DUtil {
 	}
 	public static void setTitan(String p) {
 		DSave.saveData(p, "ALLEGIANCE", "titan");
+	}
+	/**
+	 * Sets a player's allegiance to Giant.
+	 * @param p
+	 */
+	public static void setGiant(Player p) {
+		DSave.saveData(p, "ALLEGIANCE", "giant");
+	}
+	public static void setGiant(String p) {
+		DSave.saveData(p, "ALLEGIANCE", "giant");
 	}
 	/**
 	 * Sets a player's allegiance to God.
@@ -802,7 +822,9 @@ public class DUtil {
 			case 10: return "Exemplar";
 			default: return "Olympian";
 			}
-		} else if (is(p, "Omni"))
+		} else if (getAllegiance(p).equalsIgnoreCase("giant")) {
+			return "Giant";
+		} else if (is(p, "omni"))
 			return "Admin";
 		return "Error";
 	}

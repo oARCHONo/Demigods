@@ -1,6 +1,7 @@
 package com.WildAmazing.marinating.Demigods;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,6 +17,7 @@ import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -136,12 +138,41 @@ public class ShrineManager implements Listener {
 				e.setCancelled(true);
 	}
 	@EventHandler (priority = EventPriority.MONITOR)
-	public void onPistonEvent(BlockPistonExtendEvent e) {
-		if (!Settings.getEnabledWorlds().contains(e.getBlock().getWorld()))
-			return;
-		for (WriteLocation center : DUtil.getAllShrines())
-			if ((DUtil.toWriteLocation(e.getBlock().getLocation())).equalsApprox(center))
+	public void onPistonExtendEvent(BlockPistonExtendEvent e)
+	{
+		List<Block> blocks = e.getBlocks();
+		
+		CHECKBLOCKS:
+		for (Block b : blocks)
+		{
+			if (!Settings.getEnabledWorlds().contains(b.getWorld()))
+			{
+				return;
+			}
+			for (WriteLocation center : DUtil.getAllShrines())
+			{
+				if ((DUtil.toWriteLocation(b.getLocation())).equalsApprox(center))
+				{
+					e.setCancelled(true);
+					break CHECKBLOCKS;
+				}
+			}
+		}
+	}
+	@EventHandler (priority = EventPriority.MONITOR)
+	public void onPistonRetractEvent(BlockPistonRetractEvent e)
+	{
+		// Define variables
+		final Block b = e.getBlock().getRelative(e.getDirection(), 2);
+		
+		if (!Settings.getEnabledWorlds().contains(b.getWorld())) return;
+		for (WriteLocation shrine : DUtil.getAllShrines())
+		{
+			if ((DUtil.toWriteLocation(b.getLocation())).equalsApprox((shrine)) && e.isSticky())
+			{
 				e.setCancelled(true);
+			}
+		}
 	}
 	@EventHandler (priority = EventPriority.MONITOR)
 	public void explosionManaging(final EntityExplodeEvent e) {
