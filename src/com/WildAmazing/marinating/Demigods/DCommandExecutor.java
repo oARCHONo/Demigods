@@ -17,7 +17,6 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
@@ -36,7 +35,7 @@ import com.WildAmazing.marinating.Demigods.Deities.Titans.Prometheus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Rhea;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Themis;
 
-public class DCommandExecutor implements CommandExecutor, Listener
+public class DCommandExecutor implements CommandExecutor
 {
 	Demigods plugin;
 	double ADVANTAGEPERCENT = 1.3;
