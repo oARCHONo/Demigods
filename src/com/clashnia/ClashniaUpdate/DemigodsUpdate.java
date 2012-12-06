@@ -22,34 +22,30 @@ public class DemigodsUpdate
 {
 	static Logger log = Logger.getLogger("Minecraft");
 	
+	/*
+	 *  (String)OLD_DOWNLOAD_LINK : The download link for what should be this exact jar, or the last stable jar if this is a development build.
+	 */
+	static String OLD_DOWNLOAD_LINK = "http://dev.bukkit.org/media/files/628/826/Demigods.jar";
+	
 	public static boolean shouldUpdate()
 	{
 		PluginDescriptionFile pdf = DUtil.getPlugin().getDescription();
-		String latestVersion = pdf.getVersion();
-		String onlineVersion;
+		String currentVersion = pdf.getVersion();
 		
-		if (latestVersion.startsWith("d")) return false; // development versions shouldn't downgrade
+		if (currentVersion.startsWith("d")) return false; // development versions shouldn't downgrade
 
 		try
 		{
-			URL version = new URL("http://www.clashnia.com/plugins/demigods/version.txt");
-			URLConnection versionCon = version.openConnection();
-			versionCon.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"); //FIXES 403 ERROR
-			BufferedReader in = new BufferedReader(new InputStreamReader(versionCon.getInputStream()));
-			onlineVersion = in.readLine();
-			if (latestVersion.equals(onlineVersion) || onlineVersion.startsWith("d"))
+			String downloadLink = getDownloadLink();
+			
+			if (downloadLink.equals(OLD_DOWNLOAD_LINK))
 			{
-				log.info("[Demigods] Demigods is up to date. Version "
-						+ latestVersion);
-				in.close();
+				log.info("[Demigods] Demigods is up to date.");
 				return false;
 			}
 			else
 			{
 				log.info("[Demigods] Demigods is not up to date...");
-				log.info("[Demigods] Current version: " + latestVersion);
-				log.info("[Demigods] New version: " + onlineVersion);
-				in.close();
 				return true;
 			}
 		}
@@ -75,11 +71,12 @@ public class DemigodsUpdate
 			byte[] buffer = new byte[1024];
 			int read = 0;
 			int bytesTransferred = 0;
-			
+			String downloadLink = getDownloadLink();
+
 			log.info("[Demigods] Attempting to update to latest version...");
 			
 			// Set latest build URL
-			URL plugin = new URL("http://www.clashnia.com/plugins/demigods/Demigods.jar");
+			URL plugin = new URL(downloadLink);
 			
 			// Open connection to latest build and set user-agent for download, also determine file size
 			URLConnection pluginCon = plugin.openConnection();
@@ -130,5 +127,19 @@ public class DemigodsUpdate
 		{
 			log.warning("[Demigods] Error downloading file: " + ex);
 		}
+	}
+	
+	private static String getDownloadLink() throws IOException
+	{
+		String downloadLink;
+		
+		URL version = new URL("http://www.clashnia.com/plugins/demigods/dl.txt");
+		URLConnection downloadCon = version.openConnection();
+		downloadCon.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"); //FIXES 403 ERROR
+		BufferedReader in = new BufferedReader(new InputStreamReader(downloadCon.getInputStream()));
+		downloadLink = in.readLine();
+		in.close();
+		
+		return downloadLink;
 	}
 }

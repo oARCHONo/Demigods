@@ -560,6 +560,9 @@ public class DCommandExecutor implements CommandExecutor
 			p.sendMessage(ChatColor.GRAY+"Helios - Titan of the sun and keeper of oaths.");
 			p.sendMessage(ChatColor.GRAY+"Koios - Titan of intelligence.");
 				 */
+			} else if (args[0].equalsIgnoreCase("giant")) {
+				p.sendMessage(ChatColor.YELLOW+"[Demigods] Giant Help File");
+				p.sendMessage(ChatColor.YELLOW+"Coming soon.");
 			} else if (args[0].equalsIgnoreCase("claim")) {
 				p.sendMessage(ChatColor.YELLOW+"[Demigods] Claim Help File");
 				p.sendMessage(ChatColor.GRAY+"To claim your first deity, use "+ChatColor.YELLOW+"/claim"+ChatColor.GRAY+" with");
@@ -810,7 +813,7 @@ public class DCommandExecutor implements CommandExecutor
 					TR[i] = TR[highestIndex];
 					TR[highestIndex] = l;
 				}
-				//sort giantss
+				//sort giants
 				for (int i=0;i<Giants.length;i++) {
 					int highestIndex = i;
 					long highestRank = AR[i];
@@ -851,10 +854,10 @@ public class DCommandExecutor implements CommandExecutor
 				int ap = Giants.length;
 				if (ap > 5) ap = 5;
 				p.sendMessage(ChatColor.DARK_RED+"-- Giants");
-				for (int i=0;i<tp;i++) {
+				for (int i=0;i<ap;i++) {
 					if (DUtil.getOnlinePlayer(Giants[i]) != null)
-						p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Titans[i]+" :: "+AR[i]);
-					else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Titans[i]+" :: "+AR[i]);
+						p.sendMessage(ChatColor.GREEN+"  "+(i+1)+". "+Giants[i]+" :: "+AR[i]);
+					else p.sendMessage(ChatColor.GRAY+"  "+(i+1)+". "+Giants[i]+" :: "+AR[i]);
 				}
 				p.sendMessage(ChatColor.GRAY+"To see the full list, use "+ChatColor.YELLOW+"/dg rankings god|titan|giant");
 			}	else {
