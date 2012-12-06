@@ -8,7 +8,7 @@ Not to be confused with other RPG plugins that focus on skills and classes alone
 Installation
 ============
 
-To install, simply place the [Demigods.jar](http://www.clashnia.com/plugins/demigods/Demigods.jar) in your plugins folder and run the server. That's it. Everything else is handled automatically.
+To install, simply place the [Demigods.jar](http://dev.bukkit.org/server-mods/demigods/files/) in your plugins folder and run the server. That's it. Everything else is handled automatically.
 
 Features
 ========
