@@ -19,7 +19,7 @@ import com.WildAmazing.marinating.Demigods.Deities.Gods.Ares;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Athena;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Hades;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Hephaestus;
-import com.WildAmazing.marinating.Demigods.Deities.Gods.Poseidon;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Dagon;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Zeus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Atlas;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Cronus;
@@ -391,8 +391,8 @@ public class DebugManager {
 					DUtil.removeDeity(p, info[0]);
 					if (info[0].equalsIgnoreCase("zeus"))
 						DUtil.giveDeitySilent(p, new Zeus(p));
-					else if (info[0].equalsIgnoreCase("poseidon"))
-						DUtil.giveDeitySilent(p, new Poseidon(p));
+					else if (info[0].equalsIgnoreCase("Dagon"))
+						DUtil.giveDeitySilent(p, new Dagon(p));
 					else if (info[0].equalsIgnoreCase("hades"))
 						DUtil.giveDeitySilent(p, new Hades(p));
 					else if (info[0].equalsIgnoreCase("Apollo"))

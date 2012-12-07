@@ -25,7 +25,7 @@ import com.WildAmazing.marinating.Demigods.Deities.Gods.Ares;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Athena;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Hades;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Hephaestus;
-import com.WildAmazing.marinating.Demigods.Deities.Gods.Poseidon;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Dagon;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Zeus;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Atlas;
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Cronus;
@@ -525,7 +525,7 @@ public class DCommandExecutor implements CommandExecutor
 				p.sendMessage(ChatColor.GRAY+"For more information on the Gods, use /dg <name>");
 				p.sendMessage(ChatColor.GOLD+"----Tier 1");
 				p.sendMessage(ChatColor.GRAY+"Zeus - God of lightning and air.");
-				p.sendMessage(ChatColor.GRAY+"Poseidon - God of the seas.");
+				p.sendMessage(ChatColor.GRAY+"Dagon - God of the seas.");
 				p.sendMessage(ChatColor.GRAY+"Hades - God of the underworld.");
 				p.sendMessage(ChatColor.GOLD+"----Tier 2");
 				p.sendMessage(ChatColor.GRAY+"Ares - God of war.");
@@ -1559,7 +1559,7 @@ public class DCommandExecutor implements CommandExecutor
 			else if (s.equals("prometheus")) DUtil.giveDeity(target, new Prometheus(target));
 			else if (s.equals("rhea")) DUtil.giveDeity(target, new Rhea(target));
 			else if (s.equals("hades")) DUtil.giveDeity(target, new Hades(target));
-			else if (s.equals("poseidon")) DUtil.giveDeity(target, new Poseidon(target));
+			else if (s.equals("dagon")) DUtil.giveDeity(target, new Dagon(target));
 			else if (s.equals("atlas")) DUtil.giveDeity(target, new Atlas(target));
 			else if (s.equals("athena")) DUtil.giveDeity(target, new Athena(target));
 			else if (s.equals("oceanus")) DUtil.giveDeity(target, new Oceanus(target));
@@ -1908,7 +1908,7 @@ public class DCommandExecutor implements CommandExecutor
 			Deity choice = null;
 			switch (p.getItemInHand().getType()) {
 			case IRON_INGOT: choice = new Zeus(p.getName()); break;
-			case WATER_BUCKET: choice = new Poseidon(p.getName()); break;
+			case WATER_BUCKET: choice = new Dagon(p.getName()); break;
 			case BONE: choice = new Hades(p.getName()); break;
 			//
 			case SOUL_SAND: choice = new Cronus(p.getName()); break;
@@ -1948,7 +1948,7 @@ public class DCommandExecutor implements CommandExecutor
 		Deity choice = null;
 		switch (p.getItemInHand().getType()) {
 		case IRON_INGOT: choice = new Zeus(p.getName()); break;
-		case WATER_BUCKET: choice = new Poseidon(p.getName()); break;
+		case WATER_BUCKET: choice = new Dagon(p.getName()); break;
 		case BONE: choice = new Hades(p.getName()); break;
 		case GOLD_SWORD: choice = new Ares(p.getName()); break;
 		case BOOK: choice = new Athena(p.getName()); break;

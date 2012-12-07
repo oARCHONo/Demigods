@@ -20,7 +20,7 @@ import org.bukkit.util.Vector;
 import com.WildAmazing.marinating.Demigods.DUtil;
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
 
-public class Poseidon implements Deity {
+public class Dagon implements Deity {
 
 	/* General */
 	private static final long serialVersionUID = 2319323778421842381L;
@@ -39,7 +39,7 @@ public class Poseidon implements Deity {
 	private long REELTIME, drownTIME, ULTIMATETIME, LASTCHECK;
 	private Material drownBIND = null;
 
-	public Poseidon(String name) {
+	public Dagon(String name) {
 		PLAYER = name;
 		REELTIME = System.currentTimeMillis();
 		drownTIME = System.currentTimeMillis();
@@ -48,7 +48,7 @@ public class Poseidon implements Deity {
 	}
 	@Override
 	public String getName() {
-		return "Poseidon";
+		return "Dagon";
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class Poseidon implements Deity {
 
 	@Override
 	public void printInfo(Player p) {
-		if (DUtil.hasDeity(p, "Poseidon") && DUtil.isFullParticipant(p)) {
+		if (DUtil.hasDeity(p, "Dagon") && DUtil.isFullParticipant(p)) {
 			int devotion = DUtil.getDevotion(p, getName());
 			/*
 			 * Calculate special values first
@@ -86,25 +86,25 @@ public class Poseidon implements Deity {
 			/*
 			 * The printed text
 			 */
-			p.sendMessage("--"+ChatColor.GOLD+"Poseidon"+ChatColor.GRAY+" ["+devotion+"]");
+			p.sendMessage("--"+ChatColor.GOLD+"Dagon"+ChatColor.GRAY+" ["+devotion+"]");
 			p.sendMessage(":Heal "+healamt+" every "+healinterval+" seconds while in contact with water.");
 			p.sendMessage("Immune to drowning.");
 			p.sendMessage(":Deal "+damage+" damage and soak an enemy from a distance. "+ChatColor.GREEN+"/reel");
 			p.sendMessage(ChatColor.YELLOW+"Costs "+REELCOST+" Favor. Must have fishing rod in hand.");
-			if (((Poseidon)(DUtil.getDeity(p, "Poseidon"))).REEL)
+			if (((Dagon)(DUtil.getDeity(p, "Dagon"))).REEL)
 				p.sendMessage(ChatColor.AQUA+"    Reel is active.");
 			p.sendMessage(":Create a temporary flood of water. "+ChatColor.GREEN+"/drown");
 			p.sendMessage(ChatColor.YELLOW+"Costs "+drownCOST+" Favor.");
 			p.sendMessage("Water has radius of "+radius+" for "+duration+" seconds.");
-			if (((Poseidon)(DUtil.getDeity(p, "Poseidon"))).drownBIND != null)
-				p.sendMessage(ChatColor.AQUA+"    drown bound to "+(((Poseidon)(DUtil.getDeity(p, "Poseidon"))).drownBIND).name());
+			if (((Dagon)(DUtil.getDeity(p, "Dagon"))).drownBIND != null)
+				p.sendMessage(ChatColor.AQUA+"    drown bound to "+(((Dagon)(DUtil.getDeity(p, "Poseidon"))).drownBIND).name());
 			else p.sendMessage(ChatColor.AQUA+"    Use /bind to bind this skill to an item.");
 			p.sendMessage(":Trap nearby enemies in a cascade of water.");
 			p.sendMessage("Max targets: "+numtargets+". Duration: "+ultduration+ChatColor.GREEN+" /waterfall");
 			p.sendMessage(ChatColor.YELLOW+"Costs "+ULTIMATECOST+" Favor. Cooldown time: "+t+" seconds.");
 			return;
 		}
-		p.sendMessage("--"+ChatColor.GOLD+"Poseidon");
+		p.sendMessage("--"+ChatColor.GOLD+"Dagon");
 		p.sendMessage("Passive: Immune to drowning, with increased healing while in water.");
 		p.sendMessage("Active: Deal damage and soak an enemy with a fishing rod. "+ChatColor.GREEN+"/reel");
 		p.sendMessage(ChatColor.YELLOW+"Costs "+REELCOST+" Favor.");
@@ -124,7 +124,7 @@ public class Poseidon implements Deity {
 					Player p = (Player)e.getEntity();
 					if (!DUtil.isFullParticipant(p))
 						return;
-					if (!DUtil.hasDeity(p, "Poseidon"))
+					if (!DUtil.hasDeity(p, "Dagon"))
 						return;
 					e.setDamage(0);
 					e.setCancelled(true);
@@ -135,7 +135,7 @@ public class Poseidon implements Deity {
 			Player p = e.getPlayer();
 			if (!DUtil.isFullParticipant(p))
 				return;
-			if (!DUtil.hasDeity(p, "Poseidon"))
+			if (!DUtil.hasDeity(p, "Dagon"))
 				return;
 			if (REEL) {
 				if (p.getItemInHand().getType() == Material.FISHING_ROD) {
@@ -175,7 +175,7 @@ public class Poseidon implements Deity {
 		final Player p = P;
 		if (!DUtil.isFullParticipant(p))
 			return;
-		if (!DUtil.hasDeity(p, "Poseidon"))
+		if (!DUtil.hasDeity(p, "Dagon"))
 			return;
 		if (str.equalsIgnoreCase("reel")) {
 			if (REEL) {
@@ -236,7 +236,7 @@ public class Poseidon implements Deity {
 				int num = waterfall(p);
 				if (num > 0) {
 					p.sendMessage("In exchange for "+ChatColor.AQUA+ULTIMATECOST+ChatColor.WHITE+" Favor, ");
-					p.sendMessage(ChatColor.GOLD+"Poseidon"+ChatColor.WHITE+" has drowned "+num+" targets.");
+					p.sendMessage(ChatColor.GOLD+"Dagon"+ChatColor.WHITE+" has drowned "+num+" targets.");
 					DUtil.setFavor(p, DUtil.getFavor(p)-ULTIMATECOST);
 					ULTIMATETIME = System.currentTimeMillis()+t*1000;
 					DUtil.addActiveEffect(p.getName(), "Waterfall", (int)Math.round(30*Math.pow(DUtil.getDevotion(p, getName()), 0.09)));

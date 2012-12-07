@@ -28,7 +28,7 @@ import com.WildAmazing.marinating.Demigods.Deities.Gods.Ares;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Athena;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Hades;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Hephaestus;
-import com.WildAmazing.marinating.Demigods.Deities.Gods.Poseidon;
+import com.WildAmazing.marinating.Demigods.Deities.Gods.Dagon;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Zeus;
 
 import com.WildAmazing.marinating.Demigods.Deities.Titans.Atlas;
@@ -82,7 +82,7 @@ public class Demigods extends JavaPlugin implements Listener
 		 */
 		// The Big Three
 		new Zeus("ADMIN"),
-		new Poseidon("ADMIN"),
+		new Dagon("ADMIN"),
 		new Hades("ADMIN"),
 		
 		new Ares("ADMIN"),
