@@ -20,8 +20,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitWorker;
 
-import com.clashnia.ClashniaUpdate.DemigodsUpdate;
-
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Apollo;
 import com.WildAmazing.marinating.Demigods.Deities.Gods.Ares;
@@ -128,14 +126,6 @@ public class Demigods extends JavaPlugin implements Listener
 		
 		loadMetrics(); // #8
 		unstickFireball(); // #9
-		
-		// Check for updates, and then update if need be
-		
-		Boolean shouldUpdate = DemigodsUpdate.shouldUpdate();
-		if(shouldUpdate && Settings.getSettingBoolean("update"))
-		{
-			DemigodsUpdate.demigodsUpdate();
-		}
 		
 		log.info("[Demigods] Preparation completed in "+((double)(System.currentTimeMillis()-firstTime)/1000)+" seconds.");
 	}
