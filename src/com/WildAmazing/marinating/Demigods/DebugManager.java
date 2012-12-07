@@ -355,7 +355,6 @@ public class DebugManager {
 			File toread = new File(DSave.getPlayerSavePath()+p+".txt");
 			if ((toread == null) || !toread.exists())
 				return false;
-			@SuppressWarnings("resource")
 			Scanner s = new Scanner(toread);
 			//clear bindings
 			DSave.removeData(p, "BINDINGS");
