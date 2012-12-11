@@ -147,16 +147,16 @@ public class Hephaestus implements Deity, Listener {
 	}
 
 	@EventHandler
-	public void onSmelt(FurnaceSmeltEvent e) {
+	public static void onSmelt(FurnaceSmeltEvent e) {
 		if (e.getBlock() == null)
 			return;
 		for (String s : DUtil.getFullParticipants()) {
 			Player p = DUtil.getOnlinePlayer(s);
 			if ((p == null) || p.isDead())
 				continue;
-			if (DUtil.hasDeity(p, getName())) {
+			if (DUtil.hasDeity(p, "Hephaestus")) {
 				if (p.getLocation().getWorld().equals(e.getBlock().getLocation().getWorld()))
-					if (p.getLocation().distance(e.getBlock().getLocation()) <(int)Math.round(20*Math.pow(DUtil.getDevotion(p, getName()), 0.15))) {
+					if (p.getLocation().distance(e.getBlock().getLocation()) <(int)Math.round(20*Math.pow(DUtil.getDevotion(p, "Hephaestus"), 0.15))) {
 						int amount = e.getResult().getAmount()*2;
 						ItemStack out = e.getResult();
 						out.setAmount(amount);

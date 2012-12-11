@@ -6,18 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import net.minecraft.server.DataWatcher;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.Packet40EntityMetadata;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -28,19 +22,22 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import com.WildAmazing.marinating.Demigods.Deities.Deity;
+import com.WildAmazing.marinating.Demigods.Listeners.DDamage;
+import com.WildAmazing.marinating.Demigods.Listeners.DShrines;
 import com.massivecraft.factions.Board;
 import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.Faction;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 public class DUtil {
 	private static Demigods plugin; //obviously needed
-	private static int dist = Settings.getSettingInt("max_target_range"); //maximum range on targeting
-	private static int MAXIMUMHP = Settings.getSettingInt("max_hp"); //max hp a player can have
-	public static int ASCENSIONCAP = Settings.getSettingInt("ascension_cap"); //max levels
-	private static int FAVORCAP = Settings.getSettingInt("globalfavorcap"); //max favor
-	private static boolean BROADCASTNEWDEITY = Settings.getSettingBoolean("broadcast_new_deities"); //tell server when a player gets a deity
-	private static boolean ALLOWPVPEVERYWHERE = Settings.getSettingBoolean("allow_skills_everywhere");
+	private static int dist = DSettings.getSettingInt("max_target_range"); //maximum range on targeting
+	private static int MAXIMUMHP = DSettings.getSettingInt("max_hp"); //max hp a player can have
+	public static int ASCENSIONCAP = DSettings.getSettingInt("ascension_cap"); //max levels
+	private static int FAVORCAP = DSettings.getSettingInt("globalfavorcap"); //max favor
+	private static boolean BROADCASTNEWDEITY = DSettings.getSettingBoolean("broadcast_new_deities"); //tell server when a player gets a deity
+	private static boolean ALLOWPVPEVERYWHERE = DSettings.getSettingBoolean("allow_skills_everywhere");
 
 	public DUtil(Demigods d) {
 		plugin = d;
@@ -212,16 +209,6 @@ public class DUtil {
 	}
 	public static void setTitan(String p) {
 		DSave.saveData(p, "ALLEGIANCE", "titan");
-	}
-	/**
-	 * Sets a player's allegiance to Giant.
-	 * @param p
-	 */
-	public static void setGiant(Player p) {
-		DSave.saveData(p, "ALLEGIANCE", "giant");
-	}
-	public static void setGiant(String p) {
-		DSave.saveData(p, "ALLEGIANCE", "giant");
 	}
 	/**
 	 * Sets a player's allegiance to God.
@@ -824,8 +811,6 @@ public class DUtil {
 			case 10: return "Exemplar";
 			default: return "Olympian";
 			}
-		} else if (getAllegiance(p).equalsIgnoreCase("giant")) {
-			return "Giant";
 		} else if (is(p, "omni"))
 			return "Admin";
 		return "Error";
@@ -1076,7 +1061,7 @@ public class DUtil {
 			if (!w.getWorld().equals(l.getWorld().getName()))
 				continue;
 			Location l1 = DUtil.toLocation(w);
-			if (l1.distance(l) < ShrineManager.RADIUS) {
+			if (l1.distance(l) < DShrines.RADIUS) {
 				shrine = w;
 				break;
 			}
@@ -1405,59 +1390,6 @@ public class DUtil {
 		return (canWorldGuardPVP(l)&&canFactionsPVP(l));
 	}
 	/**
-	 * For fancy effects
-	 */
-	/**
-	 * Player: Player who sees it
-	 * Entity: Entity the swirls appear on
-	 * Color: In hex, eg 0x000FF
-	 * Duration in ticks
-	 * Originally by nisovin
-	 */
-	public static void playEffect(final Player player, final LivingEntity entity, int color, int duration) {
-		final DataWatcher dw = new DataWatcher();
-		dw.a(8, Integer.valueOf(0));
-		dw.watch(8, Integer.valueOf(color));
-
-		Packet40EntityMetadata packet = new Packet40EntityMetadata(entity.getEntityId(), dw, ALLOWPVPEVERYWHERE);
-		((CraftPlayer)player).getHandle().netServerHandler.sendPacket(packet);
-
-		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-			@Override
-			public void run() {
-				DataWatcher dwReal = ((CraftLivingEntity)entity).getHandle().getDataWatcher();
-				dw.watch(8, dwReal.getInt(8));
-				Packet40EntityMetadata packet = new Packet40EntityMetadata(entity.getEntityId(), dw, false);
-				((CraftPlayer)player).getHandle().netServerHandler.sendPacket(packet);
-			}
-		}, duration);
-	}
-	/**
-	 * Entity: Entity to have the effect
-	 * Color: In hex, eg 0x000FF
-	 * Duration in ticks
-	 * @param entity
-	 * @param color
-	 * @param duration
-	 * Originally by nisovin
-	 */
-	public static void playEffect(LivingEntity entity, int color, int duration) {
-		final EntityLiving el = ((CraftLivingEntity)entity).getHandle();
-		final DataWatcher dw = el.getDataWatcher();
-		dw.watch(8, Integer.valueOf(color));
-
-		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-			@Override
-			public void run() {
-				int c = 0;
-				if (!el.effects.isEmpty()) {
-					c = net.minecraft.server.PotionBrewer.a(el.effects.values());
-				}
-				dw.watch(8, Integer.valueOf(c));
-			}
-		}, duration);
-	}
-	/**
 	 * For SimpleNotice
 	 */
 	public static void sendSimpleNoticeMessage(Player p, String text) {
@@ -1478,14 +1410,14 @@ public class DUtil {
 				return;
 			int hp = getHP((Player)target);
 			if (amount < 1) return;
-			amount -= DamageHandler.armorReduction((Player)target);
-			amount = DamageHandler.specialReduction((Player)target, amount);
+			amount -= DDamage.armorReduction((Player)target);
+			amount = DDamage.specialReduction((Player)target, amount);
 			if (amount < 1) return;
 			setHP(((Player)target), hp-amount);
 			if (source instanceof Player) {
 				target.setLastDamageCause(new EntityDamageByEntityEvent(source, target, cause, amount));
 			}
-			DamageHandler.syncHealth(((Player)target));
+			DDamage.syncHealth(((Player)target));
 		} else target.damage(amount);
 	}
 	public static void damageDemigodsNonCombat(Player target, int amount) {
@@ -1493,8 +1425,8 @@ public class DUtil {
 			return;
 		int hp = getHP(target);
 		if (amount < 1) return;
-		amount -= DamageHandler.armorReduction(target);
-		amount = DamageHandler.specialReduction(target, amount);
+		amount -= DDamage.armorReduction(target);
+		amount = DDamage.specialReduction(target, amount);
 		if (amount < 1) return;
 		setHP((target), hp-amount);
 		if (target.getHealth() > 1)
@@ -1507,8 +1439,8 @@ public class DUtil {
 			return;
 		int hp = getHP(target);
 		if (amount < 1) return;
-		amount -= DamageHandler.armorReduction(target);
-		amount = DamageHandler.specialReduction(target, amount);
+		amount -= DDamage.armorReduction(target);
+		amount = DDamage.specialReduction(target, amount);
 		if (amount < 1) return;
 		setHP((target), hp-amount);
 		if (target.getHealth() > 1)
@@ -1523,6 +1455,17 @@ public class DUtil {
         }
         return null;
     }
+	
+	public static WorldGuardPlugin getWorldGuard() {
+	    Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
+	 
+	    // WorldGuard may not be loaded
+	    if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
+	        return null; // Maybe you want throw an exception instead
+	    }
+	 
+	    return (WorldGuardPlugin) plugin;
+	}	
 	
 	public static Boolean checkDemigodsExpansion()
 	{
